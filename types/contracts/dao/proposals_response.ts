@@ -18,6 +18,10 @@ export interface ProposalsResponse {
  * Note, if you are storing custom messages in the proposal, the querier needs to know what possible custom message types those are in order to parse the response
  */
 export interface ProposalResponseFor_Empty {
+  /**
+   * Immutable deposit requirement snapshotted when the proposal was submitted.
+   */
+  deposit_base_amount: Uint128;
   deposit_claimable: boolean;
   deposit_ends_at: Expiration;
   description: string;

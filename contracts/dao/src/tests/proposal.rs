@@ -902,6 +902,39 @@ mod deposit_accounting_regression {
     }
 
     #[test]
+    fn pending_overpayment_refunds_all_contributors_without_touching_treasury() {
+        let mut suite = SuiteBuilder::new()
+            .with_funds(vec![("tester0", 90), ("tester1", 100), ("treasury", 100)])
+            .with_staked(vec![("tester0", 1)])
+            .build();
+        let dao = suite.dao.clone();
+        let denom = suite.denom.clone();
+
+        suite
+            .propose("tester0", "title", "link", "desc", vec![], Some(90))
+            .unwrap();
+        suite.deposit("tester1", 1, Some(100)).unwrap();
+        suite
+            .app()
+            .send_tokens(
+                Addr::unchecked("treasury"),
+                dao.clone(),
+                coins(100, denom).as_slice(),
+            )
+            .unwrap();
+
+        suite.vote("tester0", 1, Vote::Yes).unwrap();
+        suite.app().advance_blocks(DEFAULT_VOTING_PERIOD);
+        suite.execute_proposal("tester0", 1).unwrap();
+        suite.claim_deposit("tester0", 1).unwrap();
+        suite.claim_deposit("tester1", 1).unwrap();
+
+        assert!(suite.check_balance("tester0", 90));
+        assert!(suite.check_balance("tester1", 100));
+        assert!(suite.check_balance(dao, 100));
+    }
+
+    #[test]
     fn should_not_consume_unrelated_treasury_liquidity_when_claimed_after_close() {
         let mut suite = SuiteBuilder::new()
             .with_funds(vec![("tester0", 200), ("treasury", 100)])

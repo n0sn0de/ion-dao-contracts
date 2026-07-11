@@ -434,25 +434,12 @@ pub struct DepositsResponse {
     pub deposits: Vec<DepositResponse>,
 }
 
-fn default_quarantine_legacy_deposits() -> bool {
-    true
-}
-
-#[derive(Serialize, Deserialize, Clone, Eq, PartialEq, JsonSchema, Debug)]
-pub struct MigrateMsg {
-    /// On migration from potentially vulnerable code, quarantine every proposal
-    /// submitted at or before this upgrade block until governance settles it.
-    #[serde(default = "default_quarantine_legacy_deposits")]
-    pub quarantine_legacy_deposits: bool,
-}
-
-impl Default for MigrateMsg {
-    fn default() -> Self {
-        Self {
-            quarantine_legacy_deposits: default_quarantine_legacy_deposits(),
-        }
-    }
-}
+/// Migration from v0.0.1 always quarantines potentially unsafe legacy deposits.
+/// There is deliberately no opt-out because distinct v0.0.1 artifacts cannot be
+/// distinguished safely from CW2 metadata alone.
+#[derive(Default, Serialize, Deserialize, Clone, Eq, PartialEq, JsonSchema, Debug)]
+#[serde(deny_unknown_fields)]
+pub struct MigrateMsg {}
 
 #[cfg(test)]
 mod tests {
@@ -461,9 +448,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn migrate_msg_defaults_to_legacy_quarantine() {
+    fn empty_migrate_msg_is_accepted() {
         let msg: MigrateMsg = from_binary(&Binary::from(b"{}".to_vec())).unwrap();
-        assert!(msg.quarantine_legacy_deposits);
+        assert_eq!(msg, MigrateMsg {});
+    }
+
+    #[test]
+    fn unsafe_migration_options_are_rejected() {
+        for input in [
+            br#"{"quarantine_legacy_deposits":false}"#.as_slice(),
+            br#"{"unknown":true}"#.as_slice(),
+            br#"[]"#.as_slice(),
+        ] {
+            assert!(from_binary::<MigrateMsg>(&Binary::from(input)).is_err());
+        }
     }
 
     #[test]

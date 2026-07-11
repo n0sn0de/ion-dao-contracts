@@ -16,6 +16,7 @@ use crate::{Deps, DepsMut, Response, SubMsg};
 // Version info for migration info
 pub const CONTRACT_NAME: &str = "crates.io:ion-dao";
 pub const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
+const MIGRATE_FROM_VERSION: &str = "0.0.1";
 
 // Reply IDs
 const INSTANTIATE_STAKING_CONTRACT_REPLY_ID: u64 = 0;
@@ -185,7 +186,7 @@ pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractE
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn migrate(deps: DepsMut, env: Env, msg: MigrateMsg) -> Result<Response, ContractError> {
+pub fn migrate(deps: DepsMut, env: Env, _msg: MigrateMsg) -> Result<Response, ContractError> {
     let stored_version = get_contract_version(deps.storage)?;
     if stored_version.contract != CONTRACT_NAME {
         return Err(ContractError::MigrationContractMismatch {
@@ -193,27 +194,22 @@ pub fn migrate(deps: DepsMut, env: Env, msg: MigrateMsg) -> Result<Response, Con
             actual: stored_version.contract,
         });
     }
-
-    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
-
-    let mut resp = Response::new().add_attribute("action", "migrate");
-    if msg.quarantine_legacy_deposits {
-        let cutoff_height = match LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT.may_load(deps.storage)? {
-            Some(cutoff_height) => cutoff_height,
-            None => {
-                LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT.save(deps.storage, &env.block.height)?;
-                env.block.height
-            }
-        };
-        resp = resp.add_attribute(
-            "legacy_deposit_claim_cutoff_height",
-            cutoff_height.to_string(),
-        );
-    } else {
-        resp = resp.add_attribute("legacy_deposit_claim_quarantine", "skipped");
+    if stored_version.version != MIGRATE_FROM_VERSION {
+        return Err(ContractError::MigrationVersionMismatch {
+            expected: MIGRATE_FROM_VERSION.to_string(),
+            actual: stored_version.version,
+        });
     }
 
-    Ok(resp)
+    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
+    LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT.save(deps.storage, &env.block.height)?;
+
+    Ok(Response::new()
+        .add_attribute("action", "migrate")
+        .add_attribute(
+            "legacy_deposit_claim_cutoff_height",
+            env.block.height.to_string(),
+        ))
 }
 
 #[cfg(test)]
@@ -244,7 +240,7 @@ mod test {
     }
 
     #[test]
-    fn migrate_defaults_to_quarantining_legacy_deposits_once() {
+    fn migrate_quarantines_legacy_deposits_once() {
         let mut deps = mock_osmosis_dependencies();
         let mut env = mock_env();
         env.block.height = 100;
@@ -262,32 +258,20 @@ mod test {
         );
 
         env.block.height = 200;
-        super::migrate(deps.as_mut(), env, MigrateMsg::default()).unwrap();
+        let err = super::migrate(deps.as_mut(), env, MigrateMsg::default()).unwrap_err();
+        assert_eq!(
+            err,
+            ContractError::MigrationVersionMismatch {
+                expected: "0.0.1".to_string(),
+                actual: "0.0.2".to_string(),
+            }
+        );
         assert_eq!(
             LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
                 .load(deps.as_ref().storage)
                 .unwrap(),
             100
         );
-    }
-
-    #[test]
-    fn migrate_can_skip_legacy_quarantine_for_a_known_safe_instance() {
-        let mut deps = mock_osmosis_dependencies();
-        let env = mock_env();
-
-        super::migrate(
-            deps.as_mut(),
-            env,
-            MigrateMsg {
-                quarantine_legacy_deposits: false,
-            },
-        )
-        .unwrap();
-        assert!(LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
-            .may_load(deps.as_ref().storage)
-            .unwrap()
-            .is_none());
     }
 
     #[test]

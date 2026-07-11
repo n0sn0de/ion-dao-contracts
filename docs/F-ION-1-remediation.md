@@ -21,30 +21,18 @@ The contract also rejects any claim where the proposal's aggregate stored
 
 ## Upgradeable instances
 
-The migration message is:
+The empty object is the only accepted migration message:
 
 ```json
 {}
 ```
 
-An empty message safely defaults `quarantine_legacy_deposits` to `true`. The
-first enabled migration records `legacy_deposit_claim_cutoff_height`; later
-enabled migrations preserve that original cutoff. Claims for proposals whose
-`submitted_at.height` is less than or equal to the cutoff require separate
-reconciliation.
-
-The explicit message below is only for an instance independently proven never
-to have executed vulnerable deposit accounting:
-
-```json
-{
-  "quarantine_legacy_deposits": false
-}
-```
-
-Do not use that opt-out merely because aggregate proposal totals look normal.
-Legacy config changes can produce undercollateralized records at or below the
-proposal's original base.
+Migration is restricted to CW2 identity `crates.io:ion-dao` version `0.0.1` and
+always records `legacy_deposit_claim_cutoff_height`. There is deliberately no
+quarantine opt-out: multiple historical artifacts report v0.0.1, so CW2
+metadata and normal-looking aggregate totals cannot prove that an instance is
+safe. Legacy config changes can produce undercollateralized records at or below
+the proposal's original base. Repeated migration of v0.0.2 is rejected.
 
 After migration, verify all of the following from chain state:
 

@@ -76,6 +76,9 @@ pub enum ContractError {
     #[error("Cannot migrate contract {actual}; expected {expected}")]
     MigrationContractMismatch { expected: String, actual: String },
 
+    #[error("Cannot migrate contract version {actual}; expected {expected}")]
+    MigrationVersionMismatch { expected: String, actual: String },
+
     #[error("Got a submessage reply with unknown id: {id}")]
     UnknownReplyId { id: u64 },
 

@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MigrateMsg",
+  "type": "object",
+  "properties": {
+    "quarantine_legacy_deposits": {
+      "description": "On migration from potentially vulnerable code, quarantine every proposal submitted at or before this upgrade block until governance settles it.",
+      "default": true,
+      "type": "boolean"
+    }
+  }
+}

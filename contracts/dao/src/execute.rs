@@ -253,11 +253,11 @@ pub fn claim_deposit(
     if !prop.deposit_claimable {
         return Err(ContractError::DepositNotClaimable {});
     }
-    let legacy_claim_is_quarantined = LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
-        .may_load(deps.storage)?
-        .map_or(false, |cutoff_height| {
-            prop.submitted_at.height <= cutoff_height
-        });
+    let legacy_claim_is_quarantined =
+        match LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT.may_load(deps.storage)? {
+            Some(cutoff_height) => prop.submitted_at.height <= cutoff_height,
+            None => false,
+        };
     if prop.total_deposit > prop.deposit_base_amount || legacy_claim_is_quarantined {
         return Err(ContractError::UnreconciledDeposit {});
     }
@@ -506,8 +506,9 @@ mod test {
     use std::marker::PhantomData;
 
     use crate::{
+        msg::MigrateMsg,
         proposal::BlockTime,
-        state::{Config, Deposit, LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT},
+        state::{Config, Deposit},
     };
     use cosmwasm_std::{
         coin,
@@ -776,9 +777,7 @@ mod test {
         GOV_TOKEN
             .save(deps.as_mut().storage, &"utnt".to_string())
             .unwrap();
-        LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
-            .save(deps.as_mut().storage, &env.block.height)
-            .unwrap();
+        crate::contract::migrate(deps.as_mut(), env.clone(), MigrateMsg::default()).unwrap();
         super::create_deposit(deps.as_mut().storage, 1, &depositor, &Uint128::new(91)).unwrap();
 
         let err = super::claim_deposit(deps.as_mut(), env, mock_info(depositor.as_str(), &[]), 1)
@@ -809,9 +808,7 @@ mod test {
         GOV_TOKEN
             .save(deps.as_mut().storage, &"utnt".to_string())
             .unwrap();
-        LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
-            .save(deps.as_mut().storage, &env.block.height)
-            .unwrap();
+        crate::contract::migrate(deps.as_mut(), env.clone(), MigrateMsg::default()).unwrap();
         super::create_deposit(deps.as_mut().storage, 1, &depositor, &Uint128::new(100)).unwrap();
 
         let err = super::claim_deposit(deps.as_mut(), env, mock_info(depositor.as_str(), &[]), 1)
@@ -841,9 +838,7 @@ mod test {
         GOV_TOKEN
             .save(deps.as_mut().storage, &"utnt".to_string())
             .unwrap();
-        LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
-            .save(deps.as_mut().storage, &env.block.height)
-            .unwrap();
+        crate::contract::migrate(deps.as_mut(), env.clone(), MigrateMsg::default()).unwrap();
         super::create_deposit(deps.as_mut().storage, 1, &depositor, &Uint128::new(100)).unwrap();
 
         super::claim_deposit(deps.as_mut(), env, mock_info(depositor.as_str(), &[]), 1).unwrap();

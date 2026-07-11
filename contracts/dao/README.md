@@ -30,6 +30,13 @@ You can run unit tests on this via:
 
 `cargo test`
 
+## Security remediation
+
+The v0.0.2 proposal-deposit accounting and legacy-claim quarantine are documented
+in [`../../docs/F-ION-1-remediation.md`](../../docs/F-ION-1-remediation.md).
+An adminless v0.0.1 contract cannot be changed by merging or uploading this
+source; it requires a separate governance and incident-response plan.
+
 ## Deploying in production
 
 Once you are happy with the content, you can compile it to wasm via:

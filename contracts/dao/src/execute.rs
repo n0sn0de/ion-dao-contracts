@@ -40,6 +40,16 @@ fn check_status(origin_status: &Status, desired_status: Status) -> Result<(), Co
     Ok(())
 }
 
+fn submission_height_is_quarantined(
+    storage: &dyn Storage,
+    submission_height: u64,
+) -> StdResult<bool> {
+    Ok(LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
+        .may_load(storage)?
+        .map(|cutoff_height| submission_height <= cutoff_height)
+        .unwrap_or(false))
+}
+
 fn create_proposal(
     storage: &mut dyn Storage,
     prop_id: u64,
@@ -115,6 +125,12 @@ pub fn propose(
     propose_msg: ProposeMsg,
 ) -> Result<Response, ContractError> {
     check_paused(deps.storage, &env.block)?;
+    // A proposal created after migration in the same block would share the
+    // conservative cutoff height and become unclaimable. Reject it instead of
+    // accepting a deposit that the contract already knows it will quarantine.
+    if submission_height_is_quarantined(deps.storage, env.block.height)? {
+        return Err(ContractError::LegacyDepositQuarantineActive {});
+    }
 
     let cfg = CONFIG.load(deps.storage)?;
     let gov_token = GOV_TOKEN.load(deps.storage)?;
@@ -208,6 +224,11 @@ pub fn deposit(
         .add_attribute("proposal_id", prop_id.to_string());
 
     let mut prop = PROPOSALS.load(deps.storage, prop_id)?;
+    // Do not accept fresh top-ups into a proposal whose claims are quarantined.
+    // Returning an error reverts the attached funds and preserves legacy state.
+    if submission_height_is_quarantined(deps.storage, prop.submitted_at.height)? {
+        return Err(ContractError::UnreconciledDeposit {});
+    }
     check_status(&prop.status, Status::Pending)?;
     if prop.deposit_ends_at.is_expired(&env.block) {
         Err(ContractError::Expired {})
@@ -254,10 +275,7 @@ pub fn claim_deposit(
         return Err(ContractError::DepositNotClaimable {});
     }
     let legacy_claim_is_quarantined =
-        match LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT.may_load(deps.storage)? {
-            Some(cutoff_height) => prop.submitted_at.height <= cutoff_height,
-            None => false,
-        };
+        submission_height_is_quarantined(deps.storage, prop.submitted_at.height)?;
     if prop.total_deposit > prop.deposit_base_amount || legacy_claim_is_quarantined {
         return Err(ContractError::UnreconciledDeposit {});
     }
@@ -522,12 +540,15 @@ mod test {
 
     fn mock_osmosis_dependencies(
     ) -> OwnedDeps<MockStorage, MockApi, MockQuerier<OsmosisQuery>, OsmosisQuery> {
-        OwnedDeps {
+        let mut deps = OwnedDeps {
             storage: MockStorage::default(),
             api: MockApi::default(),
             querier: MockQuerier::new(&[]),
             custom_query_type: PhantomData,
-        }
+        };
+        cw2::set_contract_version(&mut deps.storage, crate::contract::CONTRACT_NAME, "0.0.1")
+            .unwrap();
+        deps
     }
 
     #[test]
@@ -646,6 +667,104 @@ mod test {
             deposit_ends_at: Expiration::AtHeight(env.block.height + 10),
             ..Default::default()
         }
+    }
+
+    #[test]
+    fn migration_block_rejects_new_proposal_deposits() {
+        let mut deps = mock_osmosis_dependencies();
+        let env = mock_env();
+
+        crate::contract::migrate(deps.as_mut(), env.clone(), MigrateMsg::default()).unwrap();
+        let err = super::propose(
+            deps.as_mut(),
+            env,
+            mock_info("proposer", &[coin(100, "utnt")]),
+            ProposeMsg {
+                title: "same block".to_string(),
+                link: "".to_string(),
+                description: "".to_string(),
+                msgs: vec![],
+            },
+        )
+        .unwrap_err();
+
+        assert_eq!(err, ContractError::LegacyDepositQuarantineActive {});
+        assert!(!PROPOSALS.has(deps.as_ref().storage, 1));
+    }
+
+    #[test]
+    fn quarantined_pending_proposal_rejects_new_top_up() {
+        let mut deps = mock_osmosis_dependencies();
+        let env = mock_env();
+        let depositor = Addr::unchecked("depositor");
+
+        CONFIG
+            .save(deps.as_mut().storage, &proposal_config(100))
+            .unwrap();
+        GOV_TOKEN
+            .save(deps.as_mut().storage, &"utnt".to_string())
+            .unwrap();
+        PROPOSALS
+            .save(deps.as_mut().storage, 1, &pending_proposal(&env))
+            .unwrap();
+        crate::contract::migrate(deps.as_mut(), env.clone(), MigrateMsg::default()).unwrap();
+
+        let err = super::deposit(
+            deps.as_mut(),
+            env,
+            mock_info(depositor.as_str(), &[coin(10, "utnt")]),
+            1,
+        )
+        .unwrap_err();
+
+        assert_eq!(err, ContractError::UnreconciledDeposit {});
+        assert_eq!(
+            PROPOSALS
+                .load(deps.as_ref().storage, 1)
+                .unwrap()
+                .total_deposit,
+            Uint128::new(90)
+        );
+        assert!(!DEPOSITS.has(deps.as_ref().storage, (1, &depositor)));
+    }
+
+    #[test]
+    fn post_quarantine_pending_proposal_accepts_top_up() {
+        let mut deps = mock_osmosis_dependencies();
+        let mut env = mock_env();
+        let depositor = Addr::unchecked("depositor");
+
+        CONFIG
+            .save(deps.as_mut().storage, &proposal_config(100))
+            .unwrap();
+        GOV_TOKEN
+            .save(deps.as_mut().storage, &"utnt".to_string())
+            .unwrap();
+        crate::contract::migrate(deps.as_mut(), env.clone(), MigrateMsg::default()).unwrap();
+        env.block.height += 1;
+        let mut proposal = pending_proposal(&env);
+        proposal.submitted_at = env.block.clone().into();
+        PROPOSALS.save(deps.as_mut().storage, 1, &proposal).unwrap();
+
+        super::deposit(
+            deps.as_mut(),
+            env,
+            mock_info(depositor.as_str(), &[coin(10, "utnt")]),
+            1,
+        )
+        .unwrap();
+
+        assert_eq!(
+            PROPOSALS.load(deps.as_ref().storage, 1).unwrap().status,
+            Status::Open
+        );
+        assert_eq!(
+            DEPOSITS
+                .load(deps.as_ref().storage, (1, &depositor))
+                .unwrap()
+                .amount,
+            Uint128::new(10)
+        );
     }
 
     #[test]

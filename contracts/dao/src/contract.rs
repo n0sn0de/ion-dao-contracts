@@ -1,7 +1,7 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{to_binary, Binary, Empty, Env, MessageInfo, Reply, StdResult, WasmMsg};
-use cw2::set_contract_version;
+use cw2::{get_contract_version, set_contract_version};
 use cw_utils::parse_reply_instantiate_data;
 
 use crate::error::ContractError;
@@ -186,6 +186,14 @@ pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractE
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn migrate(deps: DepsMut, env: Env, msg: MigrateMsg) -> Result<Response, ContractError> {
+    let stored_version = get_contract_version(deps.storage)?;
+    if stored_version.contract != CONTRACT_NAME {
+        return Err(ContractError::MigrationContractMismatch {
+            expected: CONTRACT_NAME.to_string(),
+            actual: stored_version.contract,
+        });
+    }
+
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
 
     let mut resp = Response::new().add_attribute("action", "migrate");
@@ -216,6 +224,7 @@ mod test {
         testing::{mock_env, MockApi, MockQuerier, MockStorage},
         OwnedDeps,
     };
+    use cw2::{get_contract_version, set_contract_version};
     use osmo_bindings::OsmosisQuery;
 
     use crate::state::LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT;
@@ -224,12 +233,14 @@ mod test {
 
     fn mock_osmosis_dependencies(
     ) -> OwnedDeps<MockStorage, MockApi, MockQuerier<OsmosisQuery>, OsmosisQuery> {
-        OwnedDeps {
+        let mut deps = OwnedDeps {
             storage: MockStorage::default(),
             api: MockApi::default(),
             querier: MockQuerier::new(&[]),
             custom_query_type: PhantomData,
-        }
+        };
+        set_contract_version(&mut deps.storage, CONTRACT_NAME, "0.0.1").unwrap();
+        deps
     }
 
     #[test]
@@ -239,6 +250,10 @@ mod test {
         env.block.height = 100;
 
         super::migrate(deps.as_mut(), env.clone(), MigrateMsg::default()).unwrap();
+        assert_eq!(
+            get_contract_version(deps.as_ref().storage).unwrap().version,
+            "0.0.2"
+        );
         assert_eq!(
             LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
                 .load(deps.as_ref().storage)
@@ -273,5 +288,21 @@ mod test {
             .may_load(deps.as_ref().storage)
             .unwrap()
             .is_none());
+    }
+
+    #[test]
+    fn migrate_rejects_a_different_contract_type() {
+        let mut deps = mock_osmosis_dependencies();
+        set_contract_version(&mut deps.storage, "crates.io:not-ion-dao", "0.0.1").unwrap();
+
+        let err = super::migrate(deps.as_mut(), mock_env(), MigrateMsg::default()).unwrap_err();
+
+        assert_eq!(
+            err,
+            ContractError::MigrationContractMismatch {
+                expected: CONTRACT_NAME.to_string(),
+                actual: "crates.io:not-ion-dao".to_string(),
+            }
+        );
     }
 }

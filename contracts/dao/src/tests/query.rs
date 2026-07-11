@@ -28,6 +28,7 @@ fn test_get_config() {
 
     assert_eq!(config.gov_token, "testtest");
     assert_eq!(config.staking_contract, suite.stake);
+    assert_eq!(config.legacy_deposit_claim_cutoff_height, None);
     assert_eq!(
         config.config,
         Config {
@@ -198,6 +199,7 @@ mod proposal {
             assert_eq!(resp.title, i.to_string());
             assert_eq!(resp.link, i.to_string());
             assert_eq!(resp.description, i.to_string());
+            assert_eq!(resp.deposit_base_amount, Uint128::new(100));
         }
     }
 

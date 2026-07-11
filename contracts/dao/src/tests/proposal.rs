@@ -64,6 +64,7 @@ mod propose {
         );
         assert_eq!(prop.total_weight, Uint128::new(100));
         assert_eq!(prop.total_deposit, Uint128::new(100));
+        assert_eq!(prop.deposit_base_amount, Uint128::new(100));
     }
 
     #[test]

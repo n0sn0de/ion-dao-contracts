@@ -343,6 +343,8 @@ pub struct ConfigResponse {
     pub config: Config,
     pub gov_token: String,
     pub staking_contract: Addr,
+    /// Proposals submitted at or before this height have quarantined deposit claims.
+    pub legacy_deposit_claim_cutoff_height: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Eq, PartialEq, JsonSchema, Debug)]
@@ -386,6 +388,8 @@ where
     pub total_votes: Uint128,
     pub total_weight: Uint128,
     pub total_deposit: Uint128,
+    /// Immutable deposit requirement snapshotted when the proposal was submitted.
+    pub deposit_base_amount: Uint128,
 
     pub deposit_claimable: bool,
 }

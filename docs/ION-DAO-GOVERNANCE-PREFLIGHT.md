@@ -104,8 +104,9 @@ create a publicly instantiable code family.
 > Upgrade the adminless ION DAO in place to reviewed v0.0.2. The patch fixes
 > future proposal-deposit accounting and blocks claims for proposals created
 > before migration pending a separate reconciliation plan. It does not recover
-> or redistribute past deposits. Code, tests, limits, and review:
-> https://github.com/n0sn0de/ion-dao-contracts/pull/3
+> or redistribute past deposits. Source review:
+> https://github.com/n0sn0de/ion-dao-contracts/pull/3. Live preflight and proof
+> receipts: https://github.com/n0sn0de/ion-dao-contracts/pull/4
 
 ## Reproducible proposal generation
 
@@ -115,7 +116,7 @@ osmosisd tx wasm submit-proposal store-migrate \
   osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm \
   '{}' \
   --title 'Patch ION DAO deposit accounting and quarantine legacy claims' \
-  --summary 'Upgrade the adminless ION DAO in place to reviewed v0.0.2. The patch fixes future proposal-deposit accounting and blocks claims for proposals created before migration pending a separate reconciliation plan. It does not recover or redistribute past deposits. Code, tests, limits, and review: https://github.com/n0sn0de/ion-dao-contracts/pull/3' \
+  --summary 'Upgrade the adminless ION DAO in place to reviewed v0.0.2. The patch fixes future proposal-deposit accounting and blocks claims for proposals created before migration pending a separate reconciliation plan. It does not recover or redistribute past deposits. Source review: https://github.com/n0sn0de/ion-dao-contracts/pull/3. Live preflight and proof receipts: https://github.com/n0sn0de/ion-dao-contracts/pull/4' \
   --authority osmo10d07y265gmmuvt4z0w9aw880jnsr700jjeq4qp \
   --instantiate-nobody true \
   --deposit 1500000000uosmo \

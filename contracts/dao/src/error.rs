@@ -67,6 +67,9 @@ pub enum ContractError {
     #[error("Deposit already claimed")]
     DepositAlreadyClaimed {},
 
+    #[error("Deposit claim requires manual reconciliation")]
+    UnreconciledDeposit {},
+
     #[error("Got a submessage reply with unknown id: {id}")]
     UnknownReplyId { id: u64 },
 

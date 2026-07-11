@@ -7,7 +7,10 @@ use cw_utils::parse_reply_instantiate_data;
 use crate::error::ContractError;
 use crate::helpers::get_config;
 use crate::msg::{ExecuteMsg, GovToken, InstantiateMsg, MigrateMsg, QueryMsg, VoteMsg};
-use crate::state::{Config, CONFIG, GOV_TOKEN, PROPOSAL_COUNT, STAKING_CONTRACT, TREASURY_TOKENS};
+use crate::state::{
+    Config, CONFIG, GOV_TOKEN, LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT, PROPOSAL_COUNT,
+    STAKING_CONTRACT, TREASURY_TOKENS,
+};
 use crate::{Deps, DepsMut, Response, SubMsg};
 
 // Version info for migration info
@@ -182,7 +185,93 @@ pub fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response, ContractE
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
-pub fn migrate(_deps: DepsMut, _env: Env, _msg: MigrateMsg) -> Result<Response, ContractError> {
-    // No state migrations performed, just returned a Response
-    Ok(Response::default())
+pub fn migrate(deps: DepsMut, env: Env, msg: MigrateMsg) -> Result<Response, ContractError> {
+    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
+
+    let mut resp = Response::new().add_attribute("action", "migrate");
+    if msg.quarantine_legacy_deposits {
+        let cutoff_height = match LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT.may_load(deps.storage)? {
+            Some(cutoff_height) => cutoff_height,
+            None => {
+                LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT.save(deps.storage, &env.block.height)?;
+                env.block.height
+            }
+        };
+        resp = resp.add_attribute(
+            "legacy_deposit_claim_cutoff_height",
+            cutoff_height.to_string(),
+        );
+    } else {
+        resp = resp.add_attribute("legacy_deposit_claim_quarantine", "skipped");
+    }
+
+    Ok(resp)
+}
+
+#[cfg(test)]
+mod test {
+    use std::marker::PhantomData;
+
+    use cosmwasm_std::{
+        testing::{mock_env, MockApi, MockQuerier, MockStorage},
+        OwnedDeps,
+    };
+    use osmo_bindings::OsmosisQuery;
+
+    use crate::state::LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT;
+
+    use super::*;
+
+    fn mock_osmosis_dependencies(
+    ) -> OwnedDeps<MockStorage, MockApi, MockQuerier<OsmosisQuery>, OsmosisQuery> {
+        OwnedDeps {
+            storage: MockStorage::default(),
+            api: MockApi::default(),
+            querier: MockQuerier::new(&[]),
+            custom_query_type: PhantomData,
+        }
+    }
+
+    #[test]
+    fn migrate_defaults_to_quarantining_legacy_deposits_once() {
+        let mut deps = mock_osmosis_dependencies();
+        let mut env = mock_env();
+        env.block.height = 100;
+
+        super::migrate(deps.as_mut(), env.clone(), MigrateMsg::default()).unwrap();
+        assert_eq!(
+            LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
+                .load(deps.as_ref().storage)
+                .unwrap(),
+            100
+        );
+
+        env.block.height = 200;
+        super::migrate(deps.as_mut(), env, MigrateMsg::default()).unwrap();
+        assert_eq!(
+            LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
+                .load(deps.as_ref().storage)
+                .unwrap(),
+            100
+        );
+    }
+
+    #[test]
+    fn migrate_can_skip_legacy_quarantine_for_a_known_safe_instance() {
+        let mut deps = mock_osmosis_dependencies();
+        let env = mock_env();
+
+        super::migrate(
+            deps.as_mut(),
+            env,
+            MigrateMsg {
+                quarantine_legacy_deposits: false,
+            },
+        )
+        .unwrap();
+        assert!(LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
+            .may_load(deps.as_ref().storage)
+            .unwrap()
+            .is_none());
+    }
 }

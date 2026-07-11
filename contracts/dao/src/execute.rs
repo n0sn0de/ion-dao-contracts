@@ -10,9 +10,10 @@ use crate::helpers::{duration_to_expiry, get_total_staked_supply, get_voting_pow
 use crate::msg::ProposeMsg;
 use crate::state::{
     next_id, Ballot, Config, Proposal, Votes, BALLOTS, CONFIG, DAO_PAUSED, DEPOSITS, GOV_TOKEN,
-    IDX_DEPOSITS_BY_DEPOSITOR, IDX_PROPS_BY_PROPOSER, IDX_PROPS_BY_STATUS, PROPOSALS,
-    STAKING_CONTRACT, TREASURY_TOKENS,
+    IDX_DEPOSITS_BY_DEPOSITOR, IDX_PROPS_BY_PROPOSER, IDX_PROPS_BY_STATUS,
+    LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT, PROPOSALS, STAKING_CONTRACT, TREASURY_TOKENS,
 };
+
 use crate::ContractError;
 
 use super::{DepsMut, Response, MAX_LIMIT};
@@ -252,7 +253,12 @@ pub fn claim_deposit(
     if !prop.deposit_claimable {
         return Err(ContractError::DepositNotClaimable {});
     }
-    if prop.total_deposit > prop.deposit_base_amount {
+    let legacy_claim_is_quarantined = LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
+        .may_load(deps.storage)?
+        .map_or(false, |cutoff_height| {
+            prop.submitted_at.height <= cutoff_height
+        });
+    if prop.total_deposit > prop.deposit_base_amount || legacy_claim_is_quarantined {
         return Err(ContractError::UnreconciledDeposit {});
     }
 
@@ -499,7 +505,10 @@ pub fn update_token_list(
 mod test {
     use std::marker::PhantomData;
 
-    use crate::state::{Config, Deposit};
+    use crate::{
+        proposal::BlockTime,
+        state::{Config, Deposit, LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT},
+    };
     use cosmwasm_std::{
         coin,
         testing::{mock_env, mock_info, MockApi, MockQuerier, MockStorage},
@@ -739,6 +748,107 @@ mod test {
         assert_eq!(err, ContractError::UnreconciledDeposit {});
         assert!(
             !DEPOSITS
+                .load(deps.as_ref().storage, (1, &depositor))
+                .unwrap()
+                .claimed
+        );
+    }
+
+    #[test]
+    fn legacy_config_decrease_deposit_cannot_be_claimed_after_quarantine() {
+        let mut deps = mock_osmosis_dependencies();
+        let env = mock_env();
+        let depositor = Addr::unchecked("depositor");
+        let legacy_proposal = Proposal {
+            submitted_at: BlockTime {
+                height: env.block.height - 1,
+                time: env.block.time,
+            },
+            total_deposit: Uint128::new(91),
+            deposit_base_amount: Uint128::new(100),
+            deposit_claimable: true,
+            ..Default::default()
+        };
+
+        PROPOSALS
+            .save(deps.as_mut().storage, 1, &legacy_proposal)
+            .unwrap();
+        GOV_TOKEN
+            .save(deps.as_mut().storage, &"utnt".to_string())
+            .unwrap();
+        LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
+            .save(deps.as_mut().storage, &env.block.height)
+            .unwrap();
+        super::create_deposit(deps.as_mut().storage, 1, &depositor, &Uint128::new(91)).unwrap();
+
+        let err = super::claim_deposit(deps.as_mut(), env, mock_info(depositor.as_str(), &[]), 1)
+            .unwrap_err();
+        assert_eq!(err, ContractError::UnreconciledDeposit {});
+        assert!(
+            !DEPOSITS
+                .load(deps.as_ref().storage, (1, &depositor))
+                .unwrap()
+                .claimed
+        );
+    }
+
+    #[test]
+    fn proposal_from_migration_block_cannot_be_claimed() {
+        let mut deps = mock_osmosis_dependencies();
+        let env = mock_env();
+        let depositor = Addr::unchecked("depositor");
+        let proposal = Proposal {
+            submitted_at: env.block.clone().into(),
+            total_deposit: Uint128::new(100),
+            deposit_base_amount: Uint128::new(100),
+            deposit_claimable: true,
+            ..Default::default()
+        };
+
+        PROPOSALS.save(deps.as_mut().storage, 1, &proposal).unwrap();
+        GOV_TOKEN
+            .save(deps.as_mut().storage, &"utnt".to_string())
+            .unwrap();
+        LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
+            .save(deps.as_mut().storage, &env.block.height)
+            .unwrap();
+        super::create_deposit(deps.as_mut().storage, 1, &depositor, &Uint128::new(100)).unwrap();
+
+        let err = super::claim_deposit(deps.as_mut(), env, mock_info(depositor.as_str(), &[]), 1)
+            .unwrap_err();
+        assert_eq!(err, ContractError::UnreconciledDeposit {});
+    }
+
+    #[test]
+    fn post_quarantine_deposit_can_be_claimed() {
+        let mut deps = mock_osmosis_dependencies();
+        let env = mock_env();
+        let depositor = Addr::unchecked("depositor");
+        let post_upgrade_proposal = Proposal {
+            submitted_at: BlockTime {
+                height: env.block.height + 1,
+                time: env.block.time,
+            },
+            total_deposit: Uint128::new(100),
+            deposit_base_amount: Uint128::new(100),
+            deposit_claimable: true,
+            ..Default::default()
+        };
+
+        PROPOSALS
+            .save(deps.as_mut().storage, 1, &post_upgrade_proposal)
+            .unwrap();
+        GOV_TOKEN
+            .save(deps.as_mut().storage, &"utnt".to_string())
+            .unwrap();
+        LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT
+            .save(deps.as_mut().storage, &env.block.height)
+            .unwrap();
+        super::create_deposit(deps.as_mut().storage, 1, &depositor, &Uint128::new(100)).unwrap();
+
+        super::claim_deposit(deps.as_mut(), env, mock_info(depositor.as_str(), &[]), 1).unwrap();
+        assert!(
+            DEPOSITS
                 .load(deps.as_ref().storage, (1, &depositor))
                 .unwrap()
                 .claimed

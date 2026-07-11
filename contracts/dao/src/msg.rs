@@ -430,14 +430,37 @@ pub struct DepositsResponse {
     pub deposits: Vec<DepositResponse>,
 }
 
+fn default_quarantine_legacy_deposits() -> bool {
+    true
+}
+
 #[derive(Serialize, Deserialize, Clone, Eq, PartialEq, JsonSchema, Debug)]
-pub struct MigrateMsg {}
+pub struct MigrateMsg {
+    /// On migration from potentially vulnerable code, quarantine every proposal
+    /// submitted at or before this upgrade block until governance settles it.
+    #[serde(default = "default_quarantine_legacy_deposits")]
+    pub quarantine_legacy_deposits: bool,
+}
+
+impl Default for MigrateMsg {
+    fn default() -> Self {
+        Self {
+            quarantine_legacy_deposits: default_quarantine_legacy_deposits(),
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
-    use cosmwasm_std::to_vec;
+    use cosmwasm_std::{from_binary, to_vec, Binary};
 
     use super::*;
+
+    #[test]
+    fn migrate_msg_defaults_to_legacy_quarantine() {
+        let msg: MigrateMsg = from_binary(&Binary::from(b"{}".to_vec())).unwrap();
+        assert!(msg.quarantine_legacy_deposits);
+    }
 
     #[test]
     fn vote_encoding() {

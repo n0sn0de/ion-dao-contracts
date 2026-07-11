@@ -11,6 +11,15 @@ NOTE: _These contracts have yet to be audited. Please see the [disclaimer](#Disc
 
 Interested in contributing to DAO DAO? Check out [CONTRIBUTING.md](./CONTRIBUTING.md).
 
+## Live ION DAO remediation
+
+The reviewed source patch, artifact checksums, exact Osmosis governance message,
+funding preflight, and Juno mainnet proof receipts are documented in
+[`docs/ION-DAO-GOVERNANCE-PREFLIGHT.md`](docs/ION-DAO-GOVERNANCE-PREFLIGHT.md).
+
+The migration quarantines unsafe legacy claims. It does not claim to identify
+or repay historical depositors.
+
 ## Deploying in a development environment
 
 Build and deploy the contracts to a local chain running in Docker with:

@@ -737,6 +737,12 @@ mod test {
         let err = super::claim_deposit(deps.as_mut(), env, mock_info(depositor.as_str(), &[]), 1)
             .unwrap_err();
         assert_eq!(err, ContractError::UnreconciledDeposit {});
+        assert!(
+            !DEPOSITS
+                .load(deps.as_ref().storage, (1, &depositor))
+                .unwrap()
+                .claimed
+        );
     }
 
     #[test]

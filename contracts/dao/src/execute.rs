@@ -211,7 +211,7 @@ pub fn deposit(
     if prop.deposit_ends_at.is_expired(&env.block) {
         Err(ContractError::Expired {})
     } else {
-        let remaining = cfg.proposal_deposit.checked_sub(prop.total_deposit)?;
+        let remaining = prop.deposit_base_amount.checked_sub(prop.total_deposit)?;
         let retained = received.min(remaining);
         let refund = received.checked_sub(retained)?;
 
@@ -225,7 +225,7 @@ pub fn deposit(
             });
         }
 
-        if prop.total_deposit == cfg.proposal_deposit {
+        if prop.total_deposit == prop.deposit_base_amount {
             // open
             update_proposal_status(deps.storage, prop_id, &mut prop, Status::Open)?;
             prop.activate_voting_period(env.block.into(), &cfg.voting_period);
@@ -251,6 +251,9 @@ pub fn claim_deposit(
     let prop = PROPOSALS.load(deps.storage, prop_id)?;
     if !prop.deposit_claimable {
         return Err(ContractError::DepositNotClaimable {});
+    }
+    if prop.total_deposit > prop.deposit_base_amount {
+        return Err(ContractError::UnreconciledDeposit {});
     }
 
     let mut deposit = DEPOSITS.load(deps.storage, (prop_id, &info.sender))?;
@@ -494,10 +497,28 @@ pub fn update_token_list(
 
 #[cfg(test)]
 mod test {
-    use crate::state::Deposit;
-    use cosmwasm_std::testing::MockStorage;
+    use std::marker::PhantomData;
+
+    use crate::state::{Config, Deposit};
+    use cosmwasm_std::{
+        coin,
+        testing::{mock_env, mock_info, MockApi, MockQuerier, MockStorage},
+        OwnedDeps,
+    };
+    use cw_utils::Duration;
+    use osmo_bindings::OsmosisQuery;
 
     use super::*;
+
+    fn mock_osmosis_dependencies(
+    ) -> OwnedDeps<MockStorage, MockApi, MockQuerier<OsmosisQuery>, OsmosisQuery> {
+        OwnedDeps {
+            storage: MockStorage::default(),
+            api: MockApi::default(),
+            querier: MockQuerier::new(&[]),
+            custom_query_type: PhantomData,
+        }
+    }
 
     #[test]
     fn check_paused() {
@@ -594,6 +615,128 @@ mod test {
             },
         );
         assert!(IDX_DEPOSITS_BY_DEPOSITOR.has(&storage, (&depositor, 1)));
+    }
+
+    fn proposal_config(proposal_deposit: u128) -> Config {
+        Config {
+            name: "test dao".to_string(),
+            description: "test".to_string(),
+            threshold: Default::default(),
+            voting_period: Duration::Height(10),
+            deposit_period: Duration::Height(10),
+            proposal_deposit: Uint128::new(proposal_deposit),
+            proposal_min_deposit: Uint128::new(10),
+        }
+    }
+
+    fn pending_proposal(env: &Env) -> Proposal {
+        Proposal {
+            total_deposit: Uint128::new(90),
+            deposit_base_amount: Uint128::new(100),
+            deposit_ends_at: Expiration::AtHeight(env.block.height + 10),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn pending_deposit_uses_snapshot_base_when_config_decreases() {
+        let mut deps = mock_osmosis_dependencies();
+        let env = mock_env();
+        let depositor = Addr::unchecked("depositor");
+
+        CONFIG
+            .save(deps.as_mut().storage, &proposal_config(80))
+            .unwrap();
+        GOV_TOKEN
+            .save(deps.as_mut().storage, &"utnt".to_string())
+            .unwrap();
+        PROPOSALS
+            .save(deps.as_mut().storage, 1, &pending_proposal(&env))
+            .unwrap();
+
+        super::deposit(
+            deps.as_mut(),
+            env,
+            mock_info(depositor.as_str(), &[coin(10, "utnt")]),
+            1,
+        )
+        .unwrap();
+
+        let proposal = PROPOSALS.load(deps.as_ref().storage, 1).unwrap();
+        assert_eq!(proposal.status, Status::Open);
+        assert_eq!(proposal.total_deposit, Uint128::new(100));
+        assert_eq!(
+            DEPOSITS
+                .load(deps.as_ref().storage, (1, &depositor))
+                .unwrap(),
+            Deposit {
+                amount: Uint128::new(10),
+                claimed: false
+            }
+        );
+    }
+
+    #[test]
+    fn pending_deposit_uses_snapshot_base_when_config_increases() {
+        let mut deps = mock_osmosis_dependencies();
+        let env = mock_env();
+        let depositor = Addr::unchecked("depositor");
+
+        CONFIG
+            .save(deps.as_mut().storage, &proposal_config(200))
+            .unwrap();
+        GOV_TOKEN
+            .save(deps.as_mut().storage, &"utnt".to_string())
+            .unwrap();
+        PROPOSALS
+            .save(deps.as_mut().storage, 1, &pending_proposal(&env))
+            .unwrap();
+
+        super::deposit(
+            deps.as_mut(),
+            env,
+            mock_info(depositor.as_str(), &[coin(100, "utnt")]),
+            1,
+        )
+        .unwrap();
+
+        let proposal = PROPOSALS.load(deps.as_ref().storage, 1).unwrap();
+        assert_eq!(proposal.status, Status::Open);
+        assert_eq!(proposal.total_deposit, Uint128::new(100));
+        assert_eq!(
+            DEPOSITS
+                .load(deps.as_ref().storage, (1, &depositor))
+                .unwrap(),
+            Deposit {
+                amount: Uint128::new(10),
+                claimed: false
+            }
+        );
+    }
+
+    #[test]
+    fn legacy_excess_deposit_cannot_be_claimed() {
+        let mut deps = mock_osmosis_dependencies();
+        let env = mock_env();
+        let depositor = Addr::unchecked("depositor");
+        let legacy_proposal = Proposal {
+            total_deposit: Uint128::new(200),
+            deposit_base_amount: Uint128::new(100),
+            deposit_claimable: true,
+            ..Default::default()
+        };
+
+        PROPOSALS
+            .save(deps.as_mut().storage, 1, &legacy_proposal)
+            .unwrap();
+        GOV_TOKEN
+            .save(deps.as_mut().storage, &"utnt".to_string())
+            .unwrap();
+        super::create_deposit(deps.as_mut().storage, 1, &depositor, &Uint128::new(200)).unwrap();
+
+        let err = super::claim_deposit(deps.as_mut(), env, mock_info(depositor.as_str(), &[]), 1)
+            .unwrap_err();
+        assert_eq!(err, ContractError::UnreconciledDeposit {});
     }
 
     #[test]

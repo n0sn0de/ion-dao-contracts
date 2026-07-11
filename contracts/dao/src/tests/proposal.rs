@@ -843,3 +843,119 @@ mod claim_deposit {
         );
     }
 }
+
+mod deposit_accounting_regression {
+    use cosmwasm_std::{coins, Addr};
+    use cw_multi_test::Executor;
+
+    use super::*;
+
+    #[test]
+    fn should_record_only_retained_initial_deposit_after_refund() {
+        let mut suite = SuiteBuilder::new()
+            .with_funds(vec![("tester0", 200)])
+            .with_staked(vec![("tester0", 1)])
+            .build();
+
+        suite
+            .propose("tester0", "title", "link", "desc", vec![], Some(200))
+            .unwrap();
+
+        assert!(suite.check_balance("tester0", 100));
+        assert_eq!(
+            suite.query_proposal(1).unwrap().total_deposit,
+            Uint128::new(DEFAULT_QUO_DEPOSIT)
+        );
+        assert_eq!(
+            suite.query_deposit(1, "tester0").unwrap().amount,
+            Uint128::new(DEFAULT_QUO_DEPOSIT)
+        );
+    }
+
+    #[test]
+    fn should_record_only_remaining_pending_deposit_after_refund() {
+        let mut suite = SuiteBuilder::new()
+            .with_funds(vec![("tester0", 100), ("tester1", 100)])
+            .with_staked(vec![("tester0", 1)])
+            .build();
+
+        suite
+            .propose("tester0", "title", "link", "desc", vec![], Some(90))
+            .unwrap();
+        suite.deposit("tester1", 1, Some(100)).unwrap();
+
+        assert!(suite.check_balance("tester1", 90));
+        assert_eq!(suite.query_proposal(1).unwrap().status, Status::Open);
+        assert_eq!(
+            suite.query_proposal(1).unwrap().total_deposit,
+            Uint128::new(DEFAULT_QUO_DEPOSIT)
+        );
+        assert_eq!(
+            suite.query_deposit(1, "tester0").unwrap().amount,
+            Uint128::new(90)
+        );
+        assert_eq!(
+            suite.query_deposit(1, "tester1").unwrap().amount,
+            Uint128::new(10)
+        );
+    }
+
+    #[test]
+    fn should_not_consume_unrelated_treasury_liquidity_when_claimed_after_close() {
+        let mut suite = SuiteBuilder::new()
+            .with_funds(vec![("tester0", 200), ("treasury", 100)])
+            .with_staked(vec![("tester0", 1)])
+            .build();
+        let dao = suite.dao.clone();
+        let denom = suite.denom.clone();
+
+        suite
+            .propose("tester0", "title", "link", "desc", vec![], Some(200))
+            .unwrap();
+        suite
+            .app()
+            .send_tokens(
+                Addr::unchecked("treasury"),
+                dao.clone(),
+                coins(100, denom).as_slice(),
+            )
+            .unwrap();
+
+        suite.app().advance_blocks(DEFAULT_VOTING_PERIOD);
+        suite.close_proposal("closer", 1).unwrap();
+        suite.claim_deposit("tester0", 1).unwrap();
+
+        assert!(suite.check_balance("tester0", 200));
+        assert!(suite.check_balance(dao, 100));
+    }
+
+    #[test]
+    fn should_not_consume_unrelated_treasury_liquidity_when_claimed_after_execution() {
+        let mut suite = SuiteBuilder::new()
+            .with_funds(vec![("tester0", 200), ("treasury", 100)])
+            .with_staked(vec![("tester0", 1)])
+            .build();
+        let dao = suite.dao.clone();
+        let denom = suite.denom.clone();
+
+        suite
+            .propose("tester0", "title", "link", "desc", vec![], Some(200))
+            .unwrap();
+        suite
+            .app()
+            .send_tokens(
+                Addr::unchecked("treasury"),
+                dao.clone(),
+                coins(100, denom).as_slice(),
+            )
+            .unwrap();
+
+        suite.vote("tester0", 1, Vote::Yes).unwrap();
+        suite.app().advance_blocks(DEFAULT_VOTING_PERIOD);
+        suite.execute_proposal("tester0", 1).unwrap();
+        suite.claim_deposit("tester0", 1).unwrap();
+
+        assert!(suite.check_balance("tester0", 200));
+        assert!(suite.check_balance(dao, 100));
+    }
+}

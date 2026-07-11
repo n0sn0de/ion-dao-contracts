@@ -122,6 +122,7 @@ pub fn propose(
     if received < cfg.proposal_min_deposit {
         return Err(ContractError::Unauthorized {});
     }
+    let retained = received.min(cfg.proposal_deposit);
 
     // Get total supply
     let total_supply = get_total_staked_supply(deps.as_ref())?;
@@ -152,17 +153,17 @@ pub fn propose(
         votes: Votes::default(),
         threshold: cfg.threshold,
         total_weight: total_supply,
-        total_deposit: received, // initial deposit = received
+        total_deposit: retained,
         deposit_base_amount: cfg.proposal_deposit,
         deposit_claimable: false,
     };
 
     let mut resp = Response::new();
-    if received >= cfg.proposal_deposit {
+    if retained == cfg.proposal_deposit {
         prop.activate_voting_period(env.block.into(), &cfg.voting_period);
 
-        // refund exceeded amount
-        let gap = received - cfg.proposal_deposit;
+        // refund only the amount not retained for the proposal deposit
+        let gap = received - retained;
         if gap > Uint128::zero() {
             resp = resp.add_message(BankMsg::Send {
                 to_address: info.sender.to_string(),
@@ -172,7 +173,7 @@ pub fn propose(
     }
 
     let id = next_id(deps.storage)?;
-    create_deposit(deps.storage, id, &info.sender, &received)?;
+    create_deposit(deps.storage, id, &info.sender, &retained)?;
     create_proposal(deps.storage, id, &info.sender, &prop)?;
 
     Ok(resp
@@ -210,23 +211,25 @@ pub fn deposit(
     if prop.deposit_ends_at.is_expired(&env.block) {
         Err(ContractError::Expired {})
     } else {
-        create_deposit(deps.storage, prop_id, &info.sender, &received)?;
+        let remaining = cfg.proposal_deposit.checked_sub(prop.total_deposit)?;
+        let retained = received.min(remaining);
+        let refund = received.checked_sub(retained)?;
 
-        prop.total_deposit += received;
-        if prop.total_deposit >= cfg.proposal_deposit {
+        create_deposit(deps.storage, prop_id, &info.sender, &retained)?;
+        prop.total_deposit = prop.total_deposit.checked_add(retained)?;
+
+        if !refund.is_zero() {
+            resp = resp.add_message(BankMsg::Send {
+                to_address: info.sender.to_string(),
+                amount: coins(refund.u128(), gov_token),
+            });
+        }
+
+        if prop.total_deposit == cfg.proposal_deposit {
             // open
             update_proposal_status(deps.storage, prop_id, &mut prop, Status::Open)?;
             prop.activate_voting_period(env.block.into(), &cfg.voting_period);
             PROPOSALS.save(deps.storage, prop_id, &prop)?;
-
-            // refund exceeded amount
-            let gap = prop.total_deposit - cfg.proposal_deposit;
-            if gap > Uint128::zero() {
-                resp = resp.add_message(BankMsg::Send {
-                    to_address: info.sender.to_string(),
-                    amount: coins(gap.u128(), gov_token),
-                });
-            }
 
             Ok(resp.add_attribute("result", "open"))
         } else {

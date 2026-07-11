@@ -1,0 +1,90 @@
+{
+  "schema": "jun0n0s.ion-dao-remediation.manifest.v1",
+  "prepared_at": "2026-07-11T20:13:44Z",
+  "chain": {
+    "chain_id": "osmosis-1",
+    "preflight_height": "66097384",
+    "rpc": "https://osmosis-rpc.nosnode.com:443"
+  },
+  "target": {
+    "contract": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+    "code_id": "3",
+    "admin": null,
+    "cw2_contract": "crates.io:ion-dao",
+    "cw2_version": "0.0.1",
+    "governance_authority": "osmo10d07y265gmmuvt4z0w9aw880jnsr700jjeq4qp"
+  },
+  "incident": {
+    "proposal_ids": "22-39",
+    "proposal_count": 18,
+    "recorded_deposits_uion": "662000000",
+    "normal_retained_base_uion": "9000000",
+    "apparent_excess_exposure_uion": "653000000",
+    "earliest_expiry_utc": "2026-07-17T11:09:01Z",
+    "latest_expiry_utc": "2026-07-17T11:30:35Z",
+    "snapshot_utc": "2026-07-11T19:27:02Z",
+    "all_open": true,
+    "any_claimable": false
+  },
+  "governance": {
+    "recommended_track": "expedited",
+    "expedited": true,
+    "full_deposit": "20000000000uosmo",
+    "minimum_initial_submission_deposit": "5000000000uosmo",
+    "voting_period": "86400s",
+    "yes_threshold": "0.667000000000000000",
+    "quorum": "0.200000000000000000",
+    "veto_threshold": "0.334000000000000000",
+    "safe_standard_start_cutoff_utc": "2026-07-12T05:09:01Z",
+    "recommended_expedited_start_cutoff_utc": "2026-07-16T09:09:01Z"
+  },
+  "message": {
+    "type": "/cosmwasm.wasm.v1.MsgStoreAndMigrateContract",
+    "authority": "osmo10d07y265gmmuvt4z0w9aw880jnsr700jjeq4qp",
+    "contract": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+    "migration_msg": {},
+    "instantiate_permission": "Nobody"
+  },
+  "source": {
+    "repository": "https://github.com/n0sn0de/ion-dao-contracts",
+    "reviewed_head": "81736b1bcfebdd1e3239ae37f18cef24f32d9272",
+    "merged_dev_commit": "496b2f303e5a8b5606ad7fb82fef2aada5329ab8",
+    "source_review_pr": "https://github.com/n0sn0de/ion-dao-contracts/pull/3",
+    "proposal_review_pr": "https://github.com/n0sn0de/ion-dao-contracts/pull/4"
+  },
+  "ipfs": {
+    "proposal_document": "ipfs://bafkreifslgs4iu4t3opqtwv7gtfshastxeocpj2rrbm634vwvvmqcekt6q",
+    "metadata": "ipfs://bafkreihki5gssufsdhwtcfpupfv2bnlfq3b7iqtaxxiqyocqi5nq62cduq"
+  },
+  "artifacts": {
+    "raw_release": {
+      "bytes": 2323964,
+      "sha256": "005a7a3272b2e7a704a8869453ca7f6cb0caf50a1b911c0c20cca1e5c4ede1e0"
+    },
+    "optimized_proposal_wasm": {
+      "file": "ion_dao_v0.0.2.osmosis.wasm",
+      "bytes": 447489,
+      "sha256": "37bb98453ddf9495c2cdf9a2667d515164ef9e09b15385921eaba9270d148f3e"
+    },
+    "embedded_gzip": {
+      "bytes": 150198,
+      "sha256": "37e6e3ff0eddfc9b4bb162ffd241d39d3d204f1cfa76cfef7510bd4fe1c099f5",
+      "decompressed_matches_optimized_wasm": true
+    }
+  },
+  "files": {
+    "proposal.md": "b259a5c45393db9f09dabf34cb238253b91c27a7518859edf2b6ad59011153f4",
+    "metadata.json": "ea474d2950b219ed3115f4796ba0b56586c3f44260bdd10c3850475b0f6843a4",
+    "proposal-expedited.json": "ae63c2fdf27917f2814d1dc0450d2a358bbe34346cbdafe79830155e5d934063",
+    "unsigned-expedited-tx.json": "a22107f91fd93873e91e22e62f62f09226225df1a2f11527269e2e2138a8d30a",
+    "ion_dao_v0.0.2.osmosis.wasm": "37bb98453ddf9495c2cdf9a2667d515164ef9e09b15385921eaba9270d148f3e"
+  },
+  "juno_proof": {
+    "dao": "juno1hanfjy97f87gc8va6lymvn9dcsgc40pv4n8099rjqk74x89ayk9st9ge8t",
+    "old_code_id": "5142",
+    "new_code_id": "5143",
+    "migration_tx": "757A13EBBC9C53A8DF6E014B51C2B3EC28FC8DA103AA5781473EDE8D610583E1",
+    "post_migration_claim_tx": "AE7EF212BA0FBF7671EEEDCC4D9522A1C7AF519711898D4411BD1066C19E8A82",
+    "evidence_boundary": "Juno adapters replaced only Osmosis custom message/query types with Empty; proof covers migration and state semantics, not Osmosis native governance authorization."
+  }
+}

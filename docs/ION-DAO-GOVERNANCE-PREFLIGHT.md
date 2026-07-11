@@ -93,66 +93,60 @@ decompressed bytes hash back to the 447,489-byte artifact above.
 Use `Nobody` because this proposal needs to migrate one named contract, not
 create a publicly instantiable code family.
 
-## Public proposal text
+## Public proposal package
 
-**Title**
+The definitive explorer/IPFS-ready proposal is now published in
+[`governance/ion-dao-remediation/`](../governance/ion-dao-remediation/).
+That package contains:
 
-> Patch ION DAO deposit accounting and quarantine legacy claims
+- the comprehensive human proposal and expedited-vs-standard analysis;
+- Cosmos governance `metadata.json`;
+- exact `proposal-expedited.json` input;
+- generated unsigned transaction;
+- exact optimized Wasm;
+- structured manifest; and
+- immutable IPFS publication receipts.
 
-**Summary**
+**Definitive title**
 
-> Upgrade the adminless ION DAO in place to reviewed v0.0.2. The patch fixes
-> future proposal-deposit accounting and blocks claims for proposals created
-> before migration pending a separate reconciliation plan. It does not recover
-> or redistribute past deposits. Source review:
-> https://github.com/n0sn0de/ion-dao-contracts/pull/3. Live preflight and proof
-> receipts: https://github.com/n0sn0de/ion-dao-contracts/pull/4
+> Expedited: Patch ION DAO Accounting and Quarantine Legacy Claims
 
-## Reproducible proposal generation
+The on-chain summary is 1,018 characters and uses simple Markdown headings for
+explorer rendering. It links the source review, public proposal review, immutable
+metadata, and complete proposal document.
 
-```sh
-osmosisd tx wasm submit-proposal store-migrate \
-  ion_dao_v0.0.2.osmosis.wasm \
-  osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm \
-  '{}' \
-  --title 'Patch ION DAO deposit accounting and quarantine legacy claims' \
-  --summary 'Upgrade the adminless ION DAO in place to reviewed v0.0.2. The patch fixes future proposal-deposit accounting and blocks claims for proposals created before migration pending a separate reconciliation plan. It does not recover or redistribute past deposits. Source review: https://github.com/n0sn0de/ion-dao-contracts/pull/3. Live preflight and proof receipts: https://github.com/n0sn0de/ion-dao-contracts/pull/4' \
-  --authority osmo10d07y265gmmuvt4z0w9aw880jnsr700jjeq4qp \
-  --instantiate-nobody true \
-  --deposit 1500000000uosmo \
-  --from <proposer> \
-  --chain-id osmosis-1 \
-  --node <verified-osmosis-rpc> \
-  --gas auto \
-  --gas-adjustment 1.6 \
-  --gas-prices 0.025uosmo \
-  --keyring-backend <backend> \
-  --keyring-dir <directory> \
-  --generate-only \
-  -o json
-```
+Immutable publication:
 
-Remove `--generate-only` only after re-querying the target, reproducing the
-artifact hashes, simulating the signed transaction, and confirming the wallet
-holds the required initial deposit plus fees.
+- metadata:
+  `ipfs://bafkreihki5gssufsdhwtcfpupfv2bnlfq3b7iqtaxxiqyocqi5nq62cduq`;
+- full proposal:
+  `ipfs://bafkreifslgs4iu4t3opqtwv7gtfshastxeocpj2rrbm634vwvvmqcekt6q`;
+- complete package:
+  `ipfs://bafybeiftjocrkmwojm5t57lrlkjyzxg2xjb5czzlkhm2mnba76g5ghjhny`.
 
-## Current funding blocker
+## Corrected deposit and timing gate
 
-At the same preflight, Osmosis governance required:
+Live Osmosis parameters distinguish the minimum amount required to **submit**
+from the full amount required to **start voting**:
 
-- minimum deposit: `6000000000uosmo` (6,000 OSMO);
-- minimum initial deposit ratio: `0.25`;
-- required initial submission deposit: `1500000000uosmo` (1,500 OSMO).
+| Track | Minimum initial submission | Full voting deposit | Voting period | Yes threshold |
+| --- | ---: | ---: | ---: | ---: |
+| Standard | 1,500 OSMO | 6,000 OSMO | 5 days | >50% |
+| Expedited | 5,000 OSMO | 20,000 OSMO | 24 hours | >66.7% |
 
-The operator address held `50912255uosmo` (50.912255 OSMO). A signed but
-unbroadcast zero-deposit simulation failed with:
+The earlier zero-deposit simulation correctly reported the 1,500 OSMO standard
+initial-submission floor. That amount alone would only enter deposit period; it
+would not start the five-day vote. The definitive expedited payload therefore
+uses the full `20000000000uosmo` deposit so its 24-hour vote starts immediately.
 
-```text
-was (), need (1500000000uosmo): minimum deposit is too small
-```
+The earliest ION expiry is `2026-07-17 11:09:01 UTC`. The recommended standard
+start cutoff with six hours of margin was `2026-07-12 05:09:01 UTC`. Once that
+passes, expedited voting is the only configured route that can finish before the
+incident window. No real Osmosis proposal has been submitted.
 
-Therefore no real Osmosis proposal was submitted. Broadcasting a transaction
-known to fail would waste fees and produce governance noise, not progress.
+Do not broadcast the committed unsigned transaction blindly. Re-query all live
+state, regenerate, sign without broadcasting, simulate the exact funded payload,
+and obtain explicit approval for the reviewed transaction first.
 
 ## Juno mainnet proof receipts
 

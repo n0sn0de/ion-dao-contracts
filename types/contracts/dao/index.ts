@@ -9,6 +9,7 @@ export * from "./config_response";
 export * from "./deposits_response";
 export * from "./execute_msg";
 export * from "./init_msg";
+export * from "./migrate_msg";
 export * from "./proposal_response";
 // dedup emptied this file
 // export * from "./proposal";

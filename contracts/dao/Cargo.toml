@@ -1,6 +1,6 @@
 [package]
 name = "ion-dao"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Jake Hartnell <jake@stargaze.zone>", "Ben2x4 <Ben2x4@tutanota.com>", "Ethan Frey <ethanfrey@users.noreply.github.com>", "Frostornge <hi@frostorn.ge>"]
 edition = "2018"
 description = "Implements a native token governed DAO with multiple voting patterns."
@@ -17,7 +17,6 @@ library = []
 
 [dependencies]
 cw-utils = { version = "0.13" }
-anyhow = { version = "1" }
 osmo-bindings = { version = "0.5.1" }
 cw2 = { version = "0.13" }
 cw3 = { version = "0.13" }
@@ -29,6 +28,7 @@ serde = { version = "1.0.132", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.30" }
 
 [dev-dependencies]
+anyhow = { version = "1" }
 cosmwasm-schema = { version = "1.0.0" }
 cw-multi-test = {  version = "0.13" }
 osmo-bindings-test = "0.5.1"

@@ -62,6 +62,9 @@ pub struct Ballot {
 pub const CONFIG: Item<Config> = Item::new("config");
 pub const PROPOSAL_COUNT: Item<u64> = Item::new("proposal_count");
 pub const DAO_PAUSED: Item<Expiration> = Item::new("dao_paused");
+// First migration height that quarantines proposal-deposit claims submitted at or before it.
+pub const LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT: Item<u64> =
+    Item::new("legacy_deposit_claim_cutoff_height");
 
 // Total weight and voters are queried from this contract
 pub const STAKING_CONTRACT: Item<Addr> = Item::new("staking_contract");

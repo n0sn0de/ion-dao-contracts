@@ -343,6 +343,8 @@ pub struct ConfigResponse {
     pub config: Config,
     pub gov_token: String,
     pub staking_contract: Addr,
+    /// Proposals submitted at or before this height have quarantined deposit claims.
+    pub legacy_deposit_claim_cutoff_height: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Eq, PartialEq, JsonSchema, Debug)]
@@ -386,6 +388,8 @@ where
     pub total_votes: Uint128,
     pub total_weight: Uint128,
     pub total_deposit: Uint128,
+    /// Immutable deposit requirement snapshotted when the proposal was submitted.
+    pub deposit_base_amount: Uint128,
 
     pub deposit_claimable: bool,
 }
@@ -430,14 +434,35 @@ pub struct DepositsResponse {
     pub deposits: Vec<DepositResponse>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Eq, PartialEq, JsonSchema, Debug)]
+/// Migration from v0.0.1 always quarantines potentially unsafe legacy deposits.
+/// There is deliberately no opt-out because distinct v0.0.1 artifacts cannot be
+/// distinguished safely from CW2 metadata alone.
+#[derive(Default, Serialize, Deserialize, Clone, Eq, PartialEq, JsonSchema, Debug)]
+#[serde(deny_unknown_fields)]
 pub struct MigrateMsg {}
 
 #[cfg(test)]
 mod tests {
-    use cosmwasm_std::to_vec;
+    use cosmwasm_std::{from_binary, to_vec, Binary};
 
     use super::*;
+
+    #[test]
+    fn empty_migrate_msg_is_accepted() {
+        let msg: MigrateMsg = from_binary(&Binary::from(b"{}".to_vec())).unwrap();
+        assert_eq!(msg, MigrateMsg {});
+    }
+
+    #[test]
+    fn unsafe_migration_options_are_rejected() {
+        for input in [
+            br#"{"quarantine_legacy_deposits":false}"#.as_slice(),
+            br#"{"unknown":true}"#.as_slice(),
+            br#"[]"#.as_slice(),
+        ] {
+            assert!(from_binary::<MigrateMsg>(&Binary::from(input)).is_err());
+        }
+    }
 
     #[test]
     fn vote_encoding() {

@@ -214,6 +214,7 @@ impl SuiteBuilder {
             .wrap()
             .query_wasm_smart(&dao_addr, &crate::msg::QueryMsg::GetConfig {})
             .unwrap();
+        assert_eq!(config.legacy_deposit_claim_cutoff_height, None);
 
         let mut suite = Suite {
             app,

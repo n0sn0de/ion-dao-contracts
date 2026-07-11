@@ -67,6 +67,18 @@ pub enum ContractError {
     #[error("Deposit already claimed")]
     DepositAlreadyClaimed {},
 
+    #[error("Deposit claim requires manual reconciliation")]
+    UnreconciledDeposit {},
+
+    #[error("Proposal deposits are disabled in the legacy-quarantine migration block")]
+    LegacyDepositQuarantineActive {},
+
+    #[error("Cannot migrate contract {actual}; expected {expected}")]
+    MigrationContractMismatch { expected: String, actual: String },
+
+    #[error("Cannot migrate contract version {actual}; expected {expected}")]
+    MigrationVersionMismatch { expected: String, actual: String },
+
     #[error("Got a submessage reply with unknown id: {id}")]
     UnknownReplyId { id: u64 },
 

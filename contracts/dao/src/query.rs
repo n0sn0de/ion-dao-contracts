@@ -11,8 +11,8 @@ use crate::msg::{
 };
 use crate::state::{
     parse_id, BALLOTS, CONFIG, DEPOSITS, GOV_TOKEN, IDX_DEPOSITS_BY_DEPOSITOR,
-    IDX_PROPS_BY_PROPOSER, IDX_PROPS_BY_STATUS, PROPOSALS, PROPOSAL_COUNT, STAKING_CONTRACT,
-    TREASURY_TOKENS,
+    IDX_PROPS_BY_PROPOSER, IDX_PROPS_BY_STATUS, LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT, PROPOSALS,
+    PROPOSAL_COUNT, STAKING_CONTRACT, TREASURY_TOKENS,
 };
 use crate::{Deps, QuerierWrapper, DEFAULT_LIMIT, MAX_LIMIT};
 
@@ -24,11 +24,14 @@ pub fn config(deps: Deps) -> StdResult<ConfigResponse> {
     let config = CONFIG.load(deps.storage)?;
     let gov_token = GOV_TOKEN.load(deps.storage)?;
     let staking_contract = STAKING_CONTRACT.load(deps.storage)?;
+    let legacy_deposit_claim_cutoff_height =
+        LEGACY_DEPOSIT_CLAIM_CUTOFF_HEIGHT.may_load(deps.storage)?;
 
     Ok(ConfigResponse {
         config,
         gov_token,
         staking_contract,
+        legacy_deposit_claim_cutoff_height,
     })
 }
 

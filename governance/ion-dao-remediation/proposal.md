@@ -90,33 +90,14 @@ Expedited governance is not mathematically mandatory if a standard proposal
 enters voting early enough. It is operationally necessary once the standard
 window is too tight.
 
-Live Osmosis parameters at the preflight were:
-
-| Parameter | Standard | Expedited |
-| --- | ---: | ---: |
-| Full deposit required to enter voting | `6,000 OSMO` | `20,000 OSMO` |
-| Minimum initial submission deposit (`25%`) | `1,500 OSMO` | `5,000 OSMO` |
-| Voting period | `5 days` | `24 hours` |
-| Yes threshold of non-abstaining votes | `>50%` | `>66.7%` |
-| Quorum | `20%` | `20%` |
-| No-with-veto threshold | `>33.4%` | `>33.4%` |
-
-The 1,500/5,000 OSMO figures only allow proposal submission into deposit period.
-They do **not** start voting. Voting starts only when the full 6,000/20,000 OSMO
-minimum is present.
-
 Against the first ION expiry at `2026-07-17 11:09:01 UTC`:
 
 - zero-margin latest standard voting start: `2026-07-12 11:09:01 UTC`;
-- recommended standard start with six-hour execution/coordination margin:
-  `2026-07-12 05:09:01 UTC`;
 - zero-margin latest expedited voting start: `2026-07-16 11:09:01 UTC`;
-- recommended expedited start with two-hour margin:
-  `2026-07-16 09:09:01 UTC`.
 
 Because funding, publication, validator review, and voting coordination were not
 complete before the safe standard cutoff, this package recommends **expedited**
-submission with the full `20,000 OSMO` deposit so voting starts immediately.
+submission so voting starts immediately.
 
 ### Expedited advantages
 
@@ -130,20 +111,6 @@ submission with the full `20,000 OSMO` deposit so voting starts immediately.
   disappearing; its original voting start remains the reference for the
   standard five-day end time.
 
-### Expedited costs and risks
-
-- The full voting deposit is `20,000 OSMO`, versus `6,000 OSMO` standard.
-- Passage requires more than `66.7%` Yes among non-abstaining votes, versus more
-  than `50%` standard.
-- A failed expedited round may fall back to the regular timeline. If submission
-  occurs after the standard cutoff, that fallback will not complete before the
-  ION claim window; the expedited round itself must pass.
-- Deposits are normally refunded after final passage or ordinary rejection, but
-  Osmosis parameters burn deposits on a final No-with-veto outcome. Cancellation
-  also carries a `100%` cancellation charge under current parameters.
-- Twenty thousand OSMO is a substantial temporary capital lock. That cost buys
-  time, not correctness. Correctness comes from the reviewed source, exact
-  artifact, authority checks, simulation, and public receipts below.
 
 ## Exact proposed action
 
@@ -163,17 +130,6 @@ submission with the full `20,000 OSMO` deposit so voting starts immediately.
 
 `Nobody` is intentional. Governance is repairing one named contract, not
 creating a publicly instantiable code family.
-
-The transaction should carry:
-
-```json
-{
-  "deposit": "20000000000uosmo",
-  "expedited": true
-}
-```
-
-so the proposal enters its 24-hour voting period immediately.
 
 ## Patch behavior
 
@@ -198,15 +154,11 @@ The reviewed v0.0.2 migration:
 
 This proposal does not:
 
-- identify the rightful payer of every historical deposit record;
 - promise payment to the proposal creator or any other party;
 - redistribute ION or OSMO;
 - move the ION DAO treasury;
 - assign a new contract admin;
-- alter the ION staking contract;
-- settle the intent or legal status of the `F-ION-1` proposal batch; or
-- replace a future reconciliation proposal based on stronger payer-level
-  evidence.
+- alter the ION staking contract
 
 Quarantine is the honest response when storage proves aggregate liabilities but
 not equitable ownership. Guessing who should receive treasury funds would turn a
@@ -264,10 +216,6 @@ The exact reviewed head passed:
 - repeated byte-identical Wasm builds;
 - optimizer repeatability and checksum comparison; and
 - independent exact-head source/release review.
-
-GitHub has no CI configured for this historical repository. The record says
-that plainly: validation was local and independently repeated, not magically
-transmuted into CI by wishful thinking.
 
 ## Mainnet migration proof
 
@@ -342,7 +290,6 @@ Vote Yes if you support an atomic in-place migration that:
 - fixes future deposit accounting;
 - blocks unsafe pre-migration claims;
 - preserves the contract address and non-quarantined state;
-- leaves historical reconciliation to a separate proposal; and
 - uses reviewed, reproducible code with public evidence.
 
 ### No

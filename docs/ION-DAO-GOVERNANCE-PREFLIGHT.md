@@ -9,7 +9,12 @@ mainnet proof receipts, and funding blocker are listed below.
 
 ## Live Osmosis target
 
-Read-only queries at Osmosis height `66090917` on 2026-07-11 confirmed:
+The target contract was first queried at Osmosis height `66090917` on
+2026-07-11. Subsequent target/CW2 reads during package assembly returned the
+same code ID, empty admin, and version. The manifest's `preflight_height`
+`66097384` is the later chain-header checkpoint recorded when the final package
+was generated, not a claim that every read occurred atomically at one height.
+The incident-state snapshot is separately time-stamped in the manifest.
 
 | Field | Value |
 | --- | --- |

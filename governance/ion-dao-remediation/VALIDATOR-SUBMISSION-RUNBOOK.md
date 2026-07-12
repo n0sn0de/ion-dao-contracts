@@ -1,22 +1,11 @@
 # Validator-wallet submission runbook
 
-Status: **prepared and unsigned; no governance proposal has been broadcast**.
+Status: **signed simulation passed on the validator-controlled host; no signed
+file was retained and no governance proposal has been broadcast**.
 
-This runbook makes the selected validator operator account the on-chain proposal
-proposer while signing directly on that wallet's Linux host.
-
-## Recommendation
-
-Use direct validator signing. Do not use `x/authz` unless the validator operator
-cannot run the submission transaction directly.
-
-A standard generic authz grant can be limited to message type
-`/cosmos.gov.v1.MsgSubmitProposal`, but it cannot be limited to this proposal's
-contract, title, Wasm hash, metadata, or deposit amount. During its lifetime the
-grantee could submit any governance proposal funded by the validator account.
-That is broader than the operation needs. It also renders as a top-level
-`MsgExec`, which is less clean than a direct validator-signed
-`MsgSubmitProposal` if public provenance is the goal.
+This runbook submits directly from the validator-controlled key on a Linux host.
+It never handles mnemonics. Hostnames, filesystem layout, key aliases, and local
+network topology are intentionally not published.
 
 ## Verified identities
 
@@ -82,18 +71,18 @@ amount differs.
 
 ## 1. Set local variables
 
-Run on the Linux host that already has the validator operator key loaded.
-Replace the three local keyring values. Do not paste a mnemonic anywhere.
+Run from the repository checkout on the validator-controlled host. Substitute
+the operator's local values. Do not paste a mnemonic anywhere.
 
 ```sh
-export CLI=osmosisd
+export CLI="$(command -v osmosisd)"
 export CHAIN_ID=osmosis-1
-export NODE=http://127.0.0.1:26657
-export REST=http://127.0.0.1:1317
-export OSMOSIS_HOME="$HOME/.osmosisd"
-export KEYRING_DIR="$OSMOSIS_HOME"
-export KEYRING_BACKEND=file       # or os; use the backend already configured
-export VALIDATOR_KEY='<local-validator-operator-key-name>'
+export NODE='<trusted-osmosis-rpc-url>'
+export REST='<trusted-osmosis-rest-url>'
+export OSMOSIS_HOME='<osmosisd-client-home>'
+export KEYRING_DIR='<validator-keyring-dir>'
+export KEYRING_BACKEND='<validator-keyring-backend>'
+export VALIDATOR_KEY='<validator-key-name>'
 export EXPECTED_PROPOSER=osmo10jm8fvdyqlj78w0j5nawc76wsn4pqmdxj4q5zl
 export EXPECTED_VALOPER=osmovaloper10jm8fvdyqlj78w0j5nawc76wsn4pqmdxgzgh4c
 export GOV_AUTHORITY=osmo10d07y265gmmuvt4z0w9aw880jnsr700jjeq4qp
@@ -101,8 +90,8 @@ export TARGET=osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm
 export PACKAGE_DIR="$PWD/governance/ion-dao-remediation"
 ```
 
-If the local node uses a different home, RPC port, REST port, or keyring backend,
-change only those local variables.
+Use a trusted, fully synced Osmosis RPC and REST endpoint controlled by the
+operator where practical. Keep local host and port details out of public logs.
 
 ## 2. Fail-closed chain and key checks
 
@@ -119,7 +108,7 @@ NETWORK=$(curl -fsSL "$NODE/status" | jq -r '.result.node_info.network')
 
 CATCHING_UP=$(curl -fsSL "$NODE/status" | jq -r '.result.sync_info.catching_up')
 [ "$CATCHING_UP" = false ] || {
-  echo 'local node is still catching up' >&2
+  echo 'selected node is still catching up' >&2
   exit 1
 }
 
@@ -141,8 +130,8 @@ PROPOSER=$("$CLI" keys show "$VALIDATOR_KEY" -a \
 "$CLI" query bank balance "$EXPECTED_PROPOSER" uosmo --node "$NODE" -o json
 ```
 
-Require at least `5000200000uosmo` for the initial deposit plus the committed
-0.2 OSMO fee. Keep more for operational reserve.
+Require at least `5001000000uosmo` for the initial deposit plus the committed
+1 OSMO fee. Keep more for operational reserve.
 
 ## 3. Re-query the live migration target
 
@@ -205,7 +194,7 @@ printf '%s  %s\n' \
 jq -e '
   .deposit == "5000000000uosmo" and
   .expedited == true and
-  .metadata == "ipfs://bafkreihki5gssufsdhwtcfpupfv2bnlfq3b7iqtaxxiqyocqi5nq62cduq" and
+  .metadata == "ipfs://bafkreif6ksnwsneyjqlkyjb3qswtofzp7xsq6ctovmpfvk3qt3m6lfvgvy" and
   .messages[0]["@type"] == "/cosmwasm.wasm.v1.MsgStoreAndMigrateContract" and
   .messages[0].authority == "'"$GOV_AUTHORITY"'" and
   .messages[0].contract == "'"$TARGET"'" and
@@ -227,8 +216,8 @@ local node:
   --home "$OSMOSIS_HOME" \
   --keyring-backend "$KEYRING_BACKEND" \
   --keyring-dir "$KEYRING_DIR" \
-  --gas 8000000 \
-  --fees 200000uosmo \
+  --gas 40000000 \
+  --fees 1000000uosmo \
   --note 'ION DAO v0.0.2 expedited initial submission' \
   --generate-only -o json \
   > unsigned-validator-local.json
@@ -284,10 +273,10 @@ Simulation must succeed. If it returns a keeper, signer, sequence, balance,
 authority, Wasm, or metadata error, stop. Do not broadcast and do not retry
 blindly.
 
-The committed gas ceiling is 8,000,000 with fee `200000uosmo` at
-`0.025uosmo`/gas. If simulation shows the ceiling is insufficient or local fee
-policy differs, regenerate from the proposal input with an explicit reviewed
-ceiling and fee, then sign again.
+The final validator-host signed simulation used `27,857,862` gas. The committed
+ceiling is 40,000,000 with fee `1000000uosmo` at `0.025uosmo`/gas, a little over
+a 1.4x margin. If a fresh simulation materially changes, stop and review before
+broadcasting.
 
 ## 8. Broadcast only after final review
 
@@ -407,68 +396,3 @@ Only then can validators and delegators vote.
 ```
 
 Verify the vote from chain state. Do not infer it from CLI success text.
-
-## Optional authz route—not recommended
-
-The standard authz option is a short-lived generic authorization for exactly one
-message type:
-
-```sh
-export GRANTEE=osmo1jun0n0s59ens343cews08y0rtlnuruk7lj0grt
-export EXPIRES=$(date -u -d '+20 minutes' +%s)
-
-"$CLI" tx authz grant "$GRANTEE" generic \
-  --msg-type /cosmos.gov.v1.MsgSubmitProposal \
-  --expiration "$EXPIRES" \
-  --from "$VALIDATOR_KEY" \
-  --chain-id "$CHAIN_ID" \
-  --node "$NODE" \
-  --home "$OSMOSIS_HOME" \
-  --keyring-backend "$KEYRING_BACKEND" \
-  --keyring-dir "$KEYRING_DIR" \
-  --gas auto --gas-adjustment 1.6 --gas-prices 0.025uosmo \
-  --yes
-```
-
-After inclusion, query the exact grant:
-
-```sh
-"$CLI" query authz grants \
-  "$EXPECTED_PROPOSER" "$GRANTEE" \
-  /cosmos.gov.v1.MsgSubmitProposal \
-  --node "$NODE" -o json
-```
-
-The grantee would then generate the inner proposal with
-`--from "$EXPECTED_PROPOSER"`, wrap it using:
-
-```sh
-osmosisd tx authz exec validator-inner.json --from jun0n0s ...
-```
-
-and perform the same sign-without-broadcast and REST simulation gate.
-
-Critical boundaries:
-
-- The 5,000 OSMO deposit is withdrawn from the validator/proposer account, not
-  the grantee account.
-- The grant does not constrain proposal fields or deposit amount.
-- The top-level transaction is `MsgExec`, even though the proposal's `proposer`
-  is the validator account.
-- Revoke immediately after success or abandonment:
-
-```sh
-"$CLI" tx authz revoke "$GRANTEE" \
-  /cosmos.gov.v1.MsgSubmitProposal \
-  --from "$VALIDATOR_KEY" \
-  --chain-id "$CHAIN_ID" \
-  --node "$NODE" \
-  --home "$OSMOSIS_HOME" \
-  --keyring-backend "$KEYRING_BACKEND" \
-  --keyring-dir "$KEYRING_DIR" \
-  --gas auto --gas-adjustment 1.6 --gas-prices 0.025uosmo \
-  --yes
-```
-
-Direct validator signing has less authority surface, cleaner explorer provenance,
-and fewer transactions. Use it.

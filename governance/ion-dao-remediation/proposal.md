@@ -158,7 +158,7 @@ This proposal does not:
 - redistribute ION or OSMO;
 - move the ION DAO treasury;
 - assign a new contract admin;
-- alter the ION staking contract
+- alter the ION staking contract.
 
 Quarantine is the honest response when storage proves aggregate liabilities but
 not equitable ownership. Guessing who should receive treasury funds would turn a

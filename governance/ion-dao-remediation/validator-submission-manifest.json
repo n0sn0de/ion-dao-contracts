@@ -1,10 +1,9 @@
 {
   "schema": "ion-dao.validator-wallet-submission.v1",
-  "prepared_at": "2026-07-12T01:55:19Z",
+  "prepared_at": "2026-07-12T03:37:00Z",
   "chain": {
     "chain_id": "osmosis-1",
-    "height": "66115148",
-    "rpc": "https://osmosis-rpc.nosnode.com:443"
+    "height": "66120443"
   },
   "validator": {
     "status": "BOND_STATUS_BONDED",
@@ -27,22 +26,21 @@
     "message_type": "/cosmwasm.wasm.v1.MsgStoreAndMigrateContract",
     "authority": "osmo10d07y265gmmuvt4z0w9aw880jnsr700jjeq4qp",
     "target": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
-    "metadata": "ipfs://bafkreihki5gssufsdhwtcfpupfv2bnlfq3b7iqtaxxiqyocqi5nq62cduq"
-  },
-  "authz": {
-    "available": true,
-    "recommended": false,
-    "authorization_type": "/cosmos.authz.v1beta1.GenericAuthorization",
-    "msg_type_url": "/cosmos.gov.v1.MsgSubmitProposal",
-    "field_or_amount_constraints_available": false,
-    "grant_observed_at_packaging": false,
-    "reason": "Direct wallet signing has narrower authority, cleaner explorer provenance, and fewer transactions."
+    "metadata": "ipfs://bafkreif6ksnwsneyjqlkyjb3qswtofzp7xsq6ctovmpfvk3qt3m6lfvgvy"
   },
   "files": {
-    "proposal-expedited-initial-5000.json": "87956c18e36f21b60baf25ec8127006e896bb76e07fc5fb123d1b25a5baf03f6",
-    "unsigned-validator-initial-5000.json": "278921f9989becd120130a0f5adbc9e76ce9405b41711010451a15467065ceb9",
+    "proposal-expedited-initial-5000.json": "35146ec40cb8e308cff2cc94ac63caf43f6266ff8f7d4ba1ebebce80406cf194",
+    "unsigned-validator-initial-5000.json": "1e49046e48e096aeee5495f7fac44ff31ec86d426a37ac5877b1f3fbc78047ec",
     "simulate-signed-tx.py": "fbe3d1001600731bbf7048607211d73a7620f45fd1e5731bdb0400559a31568e",
-    "VALIDATOR-SUBMISSION-RUNBOOK.md": "1d47f2f4b6a7dbcfc47cdb1eb50c9c2adde7d1798f22bd88b1e1f776c976ac7f",
+    "VALIDATOR-SUBMISSION-RUNBOOK.md": "5d857f40b239bad173f02699bcf81f3e06a6540fa88055ccbb917d4b3c3707e0",
     "ion_dao_v0.0.2.osmosis.wasm": "37bb98453ddf9495c2cdf9a2667d515164ef9e09b15385921eaba9270d148f3e"
+  },
+  "simulation": {
+    "signed_unbroadcast": true,
+    "signed_file_retained": false,
+    "gas_used": "27857862",
+    "gas_limit": "40000000",
+    "fee_uosmo": "1000000",
+    "result": "success"
   }
 }

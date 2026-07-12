@@ -1,9 +1,9 @@
-# NosNode validator submission runbook
+# Validator-wallet submission runbook
 
 Status: **prepared and unsigned; no governance proposal has been broadcast**.
 
-This runbook makes the NosNode validator operator account the on-chain proposal
-proposer while signing directly on the validator operator's Linux host.
+This runbook makes the selected validator operator account the on-chain proposal
+proposer while signing directly on that wallet's Linux host.
 
 ## Recommendation
 
@@ -22,9 +22,8 @@ That is broader than the operation needs. It also renders as a top-level
 
 | Role | Address |
 | --- | --- |
-| NosNode validator operator | `osmovaloper10jm8fvdyqlj78w0j5nawc76wsn4pqmdxgzgh4c` |
+| Validator operator | `osmovaloper10jm8fvdyqlj78w0j5nawc76wsn4pqmdxgzgh4c` |
 | Corresponding proposer account | `osmo10jm8fvdyqlj78w0j5nawc76wsn4pqmdxj4q5zl` |
-| Validator moniker | `NosNode🔮` |
 | Validator status at packaging | `BOND_STATUS_BONDED` |
 | jun0n0s account | `osmo1jun0n0s59ens343cews08y0rtlnuruk7lj0grt` |
 
@@ -44,7 +43,7 @@ This package submits:
 ```text
 5,000 OSMO initial deposit
 expedited = true
-proposer = NosNode validator account
+proposer = validator operator account
 ```
 
 That satisfies the `25%` minimum initial deposit for an expedited proposal, but
@@ -72,7 +71,7 @@ published package is `2026-07-16 09:09:01 UTC`.
 | File | Purpose |
 | --- | --- |
 | `proposal-expedited-initial-5000.json` | Exact generic proposal input with 5,000 OSMO initial deposit |
-| `unsigned-validator-initial-5000.json` | Generated unsigned tx with NosNode proposer address |
+| `unsigned-validator-initial-5000.json` | Generated unsigned tx with the validator proposer address |
 | `proposal-expedited.json` | Full 20,000 OSMO one-shot alternative |
 | `simulate-signed-tx.py` | REST simulation helper; never broadcasts |
 | `ion_dao_v0.0.2.osmosis.wasm` | Exact production artifact embedded in the message |
@@ -230,7 +229,7 @@ local node:
   --keyring-dir "$KEYRING_DIR" \
   --gas 8000000 \
   --fees 200000uosmo \
-  --note 'NosNode expedited ION DAO v0.0.2 initial submission' \
+  --note 'ION DAO v0.0.2 expedited initial submission' \
   --generate-only -o json \
   > unsigned-validator-local.json
 ```
@@ -403,7 +402,7 @@ Only then can validators and delegators vote.
   --gas auto \
   --gas-adjustment 1.6 \
   --gas-prices 0.025uosmo \
-  --note 'NosNode YES: reviewed ION DAO accounting remediation' \
+  --note 'YES: reviewed ION DAO accounting remediation' \
   --yes
 ```
 

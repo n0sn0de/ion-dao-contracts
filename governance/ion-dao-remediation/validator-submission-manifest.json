@@ -1,5 +1,5 @@
 {
-  "schema": "nosnode.ion-dao-validator-submission.v1",
+  "schema": "ion-dao.validator-wallet-submission.v1",
   "prepared_at": "2026-07-12T01:55:19Z",
   "chain": {
     "chain_id": "osmosis-1",
@@ -7,7 +7,6 @@
     "rpc": "https://osmosis-rpc.nosnode.com:443"
   },
   "validator": {
-    "moniker": "NosNode🔮",
     "status": "BOND_STATUS_BONDED",
     "operator_address": "osmovaloper10jm8fvdyqlj78w0j5nawc76wsn4pqmdxgzgh4c",
     "proposer_account": "osmo10jm8fvdyqlj78w0j5nawc76wsn4pqmdxj4q5zl",
@@ -37,13 +36,13 @@
     "msg_type_url": "/cosmos.gov.v1.MsgSubmitProposal",
     "field_or_amount_constraints_available": false,
     "grant_observed_at_packaging": false,
-    "reason": "Direct validator signing has narrower authority, cleaner explorer provenance, and fewer transactions."
+    "reason": "Direct wallet signing has narrower authority, cleaner explorer provenance, and fewer transactions."
   },
   "files": {
     "proposal-expedited-initial-5000.json": "87956c18e36f21b60baf25ec8127006e896bb76e07fc5fb123d1b25a5baf03f6",
-    "unsigned-validator-initial-5000.json": "1a91c9afe8792eb8e1e99f81f2b0c467b3c35436bb7310242d4a275c2dc9b129",
+    "unsigned-validator-initial-5000.json": "278921f9989becd120130a0f5adbc9e76ce9405b41711010451a15467065ceb9",
     "simulate-signed-tx.py": "fbe3d1001600731bbf7048607211d73a7620f45fd1e5731bdb0400559a31568e",
-    "VALIDATOR-SUBMISSION-RUNBOOK.md": "bd2532ca220c120282d91ab3a71a7e68310c9254475dd048f5f06d88564b98b5",
+    "VALIDATOR-SUBMISSION-RUNBOOK.md": "1d47f2f4b6a7dbcfc47cdb1eb50c9c2adde7d1798f22bd88b1e1f776c976ac7f",
     "ion_dao_v0.0.2.osmosis.wasm": "37bb98453ddf9495c2cdf9a2667d515164ef9e09b15385921eaba9270d148f3e"
   }
 }

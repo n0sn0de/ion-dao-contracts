@@ -2,7 +2,7 @@
 
 Status: **prepared for public review; not signed or broadcast on Osmosis**.
 
-For direct submission from the bonded NosNode validator operator account, use
+For direct submission from the selected validator operator account, use
 [`VALIDATOR-SUBMISSION-RUNBOOK.md`](VALIDATOR-SUBMISSION-RUNBOOK.md). The
 validator package uses a 5,000 OSMO initial expedited deposit and documents the
 remaining 15,000 OSMO required before the 24-hour vote starts.
@@ -61,7 +61,7 @@ through all three gateway families, with SHA-256 matching local files.
 | `proposal-expedited.json` | Generic `osmosisd tx gov submit-proposal` input with exact message, IPFS metadata URI, full deposit, and expedited flag |
 | `unsigned-expedited-tx.json` | Generated, inspectable unsigned transaction |
 | `proposal-expedited-initial-5000.json` | Same expedited proposal with the minimum 5,000 OSMO initial submission deposit |
-| `unsigned-validator-initial-5000.json` | Generated unsigned tx with the NosNode validator account as proposer |
+| `unsigned-validator-initial-5000.json` | Generated unsigned tx with the selected validator account as proposer |
 | `VALIDATOR-SUBMISSION-RUNBOOK.md` | Fail-closed local-node direct-signing instructions plus authz risk analysis |
 | `validator-submission-manifest.json` | Structured validator identity, funding, deposit, authz, and file-hash receipt |
 | `simulate-signed-tx.py` | Signed-but-unbroadcast REST simulation helper |

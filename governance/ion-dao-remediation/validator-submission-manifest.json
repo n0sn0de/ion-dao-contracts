@@ -1,0 +1,49 @@
+{
+  "schema": "nosnode.ion-dao-validator-submission.v1",
+  "prepared_at": "2026-07-12T01:55:19Z",
+  "chain": {
+    "chain_id": "osmosis-1",
+    "height": "66115148",
+    "rpc": "https://osmosis-rpc.nosnode.com:443"
+  },
+  "validator": {
+    "moniker": "NosNode🔮",
+    "status": "BOND_STATUS_BONDED",
+    "operator_address": "osmovaloper10jm8fvdyqlj78w0j5nawc76wsn4pqmdxgzgh4c",
+    "proposer_account": "osmo10jm8fvdyqlj78w0j5nawc76wsn4pqmdxj4q5zl",
+    "observed_account_sequence": "6843",
+    "observed_balance_uosmo": "18925475869"
+  },
+  "funding": {
+    "jun0n0s_address": "osmo1jun0n0s59ens343cews08y0rtlnuruk7lj0grt",
+    "jun0n0s_observed_balance_uosmo": "5055912255",
+    "authorized_received_amount_uosmo": "5005000000",
+    "forwarded_to_validator": false
+  },
+  "proposal": {
+    "expedited": true,
+    "initial_deposit_uosmo": "5000000000",
+    "full_voting_deposit_uosmo": "20000000000",
+    "remaining_to_activate_voting_uosmo": "15000000000",
+    "message_type": "/cosmwasm.wasm.v1.MsgStoreAndMigrateContract",
+    "authority": "osmo10d07y265gmmuvt4z0w9aw880jnsr700jjeq4qp",
+    "target": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+    "metadata": "ipfs://bafkreihki5gssufsdhwtcfpupfv2bnlfq3b7iqtaxxiqyocqi5nq62cduq"
+  },
+  "authz": {
+    "available": true,
+    "recommended": false,
+    "authorization_type": "/cosmos.authz.v1beta1.GenericAuthorization",
+    "msg_type_url": "/cosmos.gov.v1.MsgSubmitProposal",
+    "field_or_amount_constraints_available": false,
+    "grant_observed_at_packaging": false,
+    "reason": "Direct validator signing has narrower authority, cleaner explorer provenance, and fewer transactions."
+  },
+  "files": {
+    "proposal-expedited-initial-5000.json": "87956c18e36f21b60baf25ec8127006e896bb76e07fc5fb123d1b25a5baf03f6",
+    "unsigned-validator-initial-5000.json": "1a91c9afe8792eb8e1e99f81f2b0c467b3c35436bb7310242d4a275c2dc9b129",
+    "simulate-signed-tx.py": "fbe3d1001600731bbf7048607211d73a7620f45fd1e5731bdb0400559a31568e",
+    "VALIDATOR-SUBMISSION-RUNBOOK.md": "bd2532ca220c120282d91ab3a71a7e68310c9254475dd048f5f06d88564b98b5",
+    "ion_dao_v0.0.2.osmosis.wasm": "37bb98453ddf9495c2cdf9a2667d515164ef9e09b15385921eaba9270d148f3e"
+  }
+}

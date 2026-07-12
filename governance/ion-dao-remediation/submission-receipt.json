@@ -1,0 +1,64 @@
+{
+  "schema": "ion-dao-osmosis-governance-submission-receipt/v1",
+  "verified_at": "2026-07-12T04:34:53Z",
+  "chain_id": "osmosis-1",
+  "source": {
+    "merged_dev_commit": "403e7665186deedfaa4983f576fcb7cc30632f32",
+    "wasm_sha256": "37bb98453ddf9495c2cdf9a2667d515164ef9e09b15385921eaba9270d148f3e",
+    "metadata": "ipfs://bafkreif6ksnwsneyjqlkyjb3qswtofzp7xsq6ctovmpfvk3qt3m6lfvgvy"
+  },
+  "proposal": {
+    "id": "1024",
+    "title": "Expedited: Patch ION DAO Accounting and Quarantine Legacy Claims",
+    "proposer": "osmo10jm8fvdyqlj78w0j5nawc76wsn4pqmdxj4q5zl",
+    "status_at_verification": "PROPOSAL_STATUS_VOTING_PERIOD",
+    "expedited": true,
+    "total_deposit": [
+      {
+        "denom": "uosmo",
+        "amount": "20000000000"
+      }
+    ],
+    "submit_time": "2026-07-12T04:31:54.995897773Z",
+    "voting_start_time": "2026-07-12T04:31:54.995897773Z",
+    "voting_end_time": "2026-07-13T04:31:54.995897773Z"
+  },
+  "submission": {
+    "txhash": "9AED184C40B6760DA628F0B118120168AEE992467902E60D9296C73AF25558AB",
+    "height": "66123301",
+    "code": 0,
+    "fee": [
+      {
+        "denom": "uosmo",
+        "amount": "1200000"
+      }
+    ],
+    "gas_wanted": "40000000",
+    "gas_used": "32426751"
+  },
+  "validator_vote": {
+    "txhash": "E1882CDBCD68A06C8850D22856C3D656481640A04CC7AE97E689F78CC049A85D",
+    "height": "66123419",
+    "code": 0,
+    "voter": "osmo10jm8fvdyqlj78w0j5nawc76wsn4pqmdxj4q5zl",
+    "option": "VOTE_OPTION_YES",
+    "weight": "1.000000000000000000",
+    "fee": [
+      {
+        "denom": "uosmo",
+        "amount": "10000"
+      }
+    ],
+    "gas_wanted": "200000",
+    "gas_used": "76374"
+  },
+  "prebroadcast_rejection": {
+    "txhash": "E0CD9878306669B8E6E2561EDB3DA7AADE17621AA61CF4E2316D361C27B9ECF6",
+    "code": 13,
+    "codespace": "sdk",
+    "reason": "The 1000000uosmo fee was below the live 1200000uosmo requirement.",
+    "included": false,
+    "fee_spent": false,
+    "sequence_consumed": false
+  }
+}

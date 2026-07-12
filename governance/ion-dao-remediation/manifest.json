@@ -1,9 +1,9 @@
 {
   "schema": "jun0n0s.ion-dao-remediation.manifest.v1",
-  "prepared_at": "2026-07-11T20:13:44Z",
+  "prepared_at": "2026-07-12T03:37:00Z",
   "chain": {
     "chain_id": "osmosis-1",
-    "preflight_height": "66097384",
+    "preflight_height": "66120443",
     "rpc": "https://osmosis-rpc.nosnode.com:443"
   },
   "target": {
@@ -53,8 +53,8 @@
     "proposal_review_pr": "https://github.com/n0sn0de/ion-dao-contracts/pull/4"
   },
   "ipfs": {
-    "proposal_document": "ipfs://bafkreifslgs4iu4t3opqtwv7gtfshastxeocpj2rrbm634vwvvmqcekt6q",
-    "metadata": "ipfs://bafkreihki5gssufsdhwtcfpupfv2bnlfq3b7iqtaxxiqyocqi5nq62cduq"
+    "proposal_document": "ipfs://bafkreibjw2ogu477jn2vgqsivojsr72ipdhmr23lgdo52zrehb7oixm57m",
+    "metadata": "ipfs://bafkreif6ksnwsneyjqlkyjb3qswtofzp7xsq6ctovmpfvk3qt3m6lfvgvy"
   },
   "artifacts": {
     "raw_release": {
@@ -73,10 +73,10 @@
     }
   },
   "files": {
-    "proposal.md": "b259a5c45393db9f09dabf34cb238253b91c27a7518859edf2b6ad59011153f4",
-    "metadata.json": "ea474d2950b219ed3115f4796ba0b56586c3f44260bdd10c3850475b0f6843a4",
-    "proposal-expedited.json": "ae63c2fdf27917f2814d1dc0450d2a358bbe34346cbdafe79830155e5d934063",
-    "unsigned-expedited-tx.json": "a22107f91fd93873e91e22e62f62f09226225df1a2f11527269e2e2138a8d30a",
+    "proposal.md": "29b69c6a73ff4b75534248ab9328ff4878cec8eb6b30dddd6624387ee45d9dfb",
+    "metadata.json": "be549b6934984c16ac243b84ad37172ffde50f0a6eab1e5aab709ed9e596a6ae",
+    "proposal-expedited.json": "7cae57303ba80ff3e7262991da78c5c3c4d5f0c02ee11f962704921947fc0cf5",
+    "unsigned-expedited-tx.json": "bf8fe4458cb5af1e9d3099fe61f805b00bb0751684f483ae82ea546e04df9132",
     "ion_dao_v0.0.2.osmosis.wasm": "37bb98453ddf9495c2cdf9a2667d515164ef9e09b15385921eaba9270d148f3e"
   },
   "juno_proof": {

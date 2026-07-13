@@ -1,6 +1,6 @@
 {
-  "schema": "ion-dao-osmosis-governance-submission-receipt/v1",
-  "verified_at": "2026-07-12T04:34:53Z",
+  "schema": "ion-dao-osmosis-governance-remediation-receipt/v2",
+  "verified_at": "2026-07-13T05:22:29Z",
   "chain_id": "osmosis-1",
   "source": {
     "merged_dev_commit": "403e7665186deedfaa4983f576fcb7cc30632f32",
@@ -11,7 +11,7 @@
     "id": "1024",
     "title": "Expedited: Patch ION DAO Accounting and Quarantine Legacy Claims",
     "proposer": "osmo10jm8fvdyqlj78w0j5nawc76wsn4pqmdxj4q5zl",
-    "status_at_verification": "PROPOSAL_STATUS_VOTING_PERIOD",
+    "status_at_verification": "PROPOSAL_STATUS_PASSED",
     "expedited": true,
     "total_deposit": [
       {
@@ -21,7 +21,14 @@
     ],
     "submit_time": "2026-07-12T04:31:54.995897773Z",
     "voting_start_time": "2026-07-12T04:31:54.995897773Z",
-    "voting_end_time": "2026-07-13T04:31:54.995897773Z"
+    "voting_end_time": "2026-07-13T04:31:54.995897773Z",
+    "final_tally_result": {
+      "yes_count": "52500808468256",
+      "no_count": "2325153964",
+      "abstain_count": "6021885842157",
+      "no_with_veto_count": "1003310000"
+    },
+    "yes_of_non_abstain_percent": "99.99366056817904"
   },
   "submission": {
     "txhash": "9AED184C40B6760DA628F0B118120168AEE992467902E60D9296C73AF25558AB",
@@ -51,6 +58,61 @@
     ],
     "gas_wanted": "200000",
     "gas_used": "76374"
+  },
+  "execution": {
+    "context": "end_block",
+    "height": "66198261",
+    "block_time": "2026-07-13T04:31:55.057366194Z",
+    "block_id_hash": "6C25AC43B394C9B35F7002539AFFB2494F56747E395DD34F48E60D058E20BF00",
+    "message_type": "/cosmwasm.wasm.v1.MsgStoreAndMigrateContract",
+    "governance_authority": "osmo10d07y265gmmuvt4z0w9aw880jnsr700jjeq4qp",
+    "code_id": "1900",
+    "contract": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+    "migration_msg": {},
+    "proposal_result_event": "proposal_passed",
+    "execution_success": true
+  },
+  "target_after_execution": {
+    "code_id": "1900",
+    "admin": null,
+    "cw2": {
+      "contract": "crates.io:ion-dao",
+      "version": "0.0.2"
+    },
+    "code_creator": "osmo10d07y265gmmuvt4z0w9aw880jnsr700jjeq4qp",
+    "code_data_hash": "37BB98453DDF9495C2CDF9A2667D515164EF9E09B15385921EABA9270D148F3E",
+    "instantiate_permission": "Nobody",
+    "migration_history": {
+      "operation": "CONTRACT_CODE_HISTORY_OPERATION_TYPE_MIGRATE",
+      "height": "66198261",
+      "tx_index": "0",
+      "msg": {}
+    },
+    "legacy_deposit_claim_cutoff_height": 66198261
+  },
+  "legacy_claim_watch": {
+    "proposal_ids": "22-39",
+    "proposal_count": 18,
+    "deposit_entry_count": 18,
+    "recorded_deposit_amount": {
+      "denom": "uion",
+      "amount": "662000000"
+    },
+    "contract_balance_at_verification": {
+      "denom": "uion",
+      "amount": "10000000"
+    },
+    "all_submitted_at_or_before_cutoff": true,
+    "all_deposits_unclaimed_at_verification": true,
+    "all_deposit_claimable_flags_false_at_verification": true,
+    "earliest_legacy_window": "2026-07-17T11:09:01.637679233Z",
+    "latest_legacy_window": "2026-07-17T11:30:35.219444065Z",
+    "monitoring_required": true
+  },
+  "scope": {
+    "migration_recovers_historical_deposits": false,
+    "migration_redistributes_historical_deposits": false,
+    "effect": "The migration quarantines claims for proposals submitted at or before the one-time cutoff while preserving the post-migration proposal path."
   },
   "prebroadcast_rejection": {
     "txhash": "E0CD9878306669B8E6E2561EDB3DA7AADE17621AA61CF4E2316D361C27B9ECF6",

@@ -1,17 +1,26 @@
 # ION DAO Osmosis governance remediation package
 
-Status: **submitted as expedited Osmosis proposal `1024` with the full 20,000
-OSMO deposit; validator proposer YES vote verified on-chain**.
+Status: **expedited Osmosis proposal `1024` passed and its atomic
+Store-and-Migrate action executed successfully**.
 
 For the reproducible preflight and direct-signing procedure, use
 [`VALIDATOR-SUBMISSION-RUNBOOK.md`](VALIDATOR-SUBMISSION-RUNBOOK.md). The
-canonical submission and vote receipts are in
+canonical submission, vote, final-tally, execution, migration, and legacy-watch receipts are in
 [`submission-receipt.json`](submission-receipt.json).
 
 - Proposal: `1024`
+- Final status: `PROPOSAL_STATUS_PASSED`
 - Submission tx: `9AED184C40B6760DA628F0B118120168AEE992467902E60D9296C73AF25558AB`
 - Validator YES vote tx: `E1882CDBCD68A06C8850D22856C3D656481640A04CC7AE97E689F78CC049A85D`
-- Voting end: `2026-07-13T04:31:54.995897773Z`
+- Execution height/time: `66198261` / `2026-07-13T04:31:55.057366194Z`
+- Migrated target: code ID `1900`, CW2 `crates.io:ion-dao 0.0.2`, admin empty
+- Audited code hash: `37bb98453ddf9495c2cdf9a2667d515164ef9e09b15385921eaba9270d148f3e`
+- Legacy cutoff height: `66198261`
+- Legacy proposals `22-39`: `662 ION` recorded across 18 unclaimed deposit entries at verification
+
+The migration does **not** recover or redistribute historical deposits. It
+quarantines the unsafe legacy claim path while preserving post-migration
+governance behavior.
 
 ## Recommendation
 
@@ -71,7 +80,7 @@ files.
 | `unsigned-validator-initial-5000.json` | Generated unsigned tx with the selected validator account as proposer |
 | `VALIDATOR-SUBMISSION-RUNBOOK.md` | Fail-closed direct-signing instructions for a validator-controlled Linux host |
 | `validator-submission-manifest.json` | Structured validator identity, funding, deposit, simulation, and file-hash receipt |
-| `submission-receipt.json` | Chain-verified proposal submission, full deposit, and validator YES vote receipt |
+| `submission-receipt.json` | Chain-verified submission, vote, final tally, execution, migration, cutoff, and legacy-claim watch receipt |
 | `simulate-signed-tx.py` | Signed-but-unbroadcast REST simulation helper |
 | `ion_dao_v0.0.2.osmosis.wasm` | Exact optimized production Wasm embedded by the proposal |
 | `manifest.json` | Structured chain, incident, governance, source, artifact, IPFS, and proof evidence |

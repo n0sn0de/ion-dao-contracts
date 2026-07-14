@@ -1,128 +1,185 @@
 # Reproducing the live-state evidence
 
-These are read-only query patterns. Supply your own trusted RPC endpoint. Do not copy a transaction command from this document; there is none.
+All commands are read-only. Use an archive-capable Osmosis endpoint and one explicit height for every query.
 
 ```bash
-export NODE='https://YOUR-TRUSTED-OSMOSIS-RPC'
+export NODE='https://YOUR-TRUSTED-ARCHIVE-OSMOSIS-RPC'
+export H='66276760'
 export DAO='osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm'
 export STAKE='osmo1yg8930mj8pk288lmkjex0qz85mj8wgtns5uzwyn2hs25pwdnw42sf745wc'
+export FACTORY='osmo1qpszqk458arkkdff5z4vrqlqv4k2n9a0tjme23vn00uyt30nrr7sfe87cv'
 ```
 
-## Chain boundary
+## Pin and retain the block
 
 ```bash
-osmosisd status --node "$NODE"
-osmosisd query block --node "$NODE" -o json
+osmosisd query block "$H" --node "$NODE" -o json > block-$H.json
+jq '.header | {chain_id,height,time,app_hash}' block-$H.json
 ```
 
-Record chain ID, height, time, and block ID. For a production snapshot, use a node that supports historical queries and pass the same retained height to every query where the CLI/module permits it.
+If any subsequent query says height unavailable or pruned, stop and use another archive endpoint. Do not silently fall back to latest state.
 
-## Contract identity and code
+## Contract identity
 
 ```bash
-osmosisd query wasm contract "$DAO" --node "$NODE" -o json
-osmosisd query wasm contract-history "$DAO" --node "$NODE" -o json
-osmosisd query wasm contract "$STAKE" --node "$NODE" -o json
-osmosisd query wasm contract-history "$STAKE" --node "$NODE" -o json
-osmosisd query wasm code-info 1900 --node "$NODE" -o json
-osmosisd query wasm code-info 2 --node "$NODE" -o json
+osmosisd query wasm contract "$DAO" --height "$H" --node "$NODE" -o json
+osmosisd query wasm contract "$STAKE" --height "$H" --node "$NODE" -o json
+
+DAO_CODE=$(osmosisd query wasm contract "$DAO" --height "$H" --node "$NODE" -o json | jq -r '.contract_info.code_id')
+STAKE_CODE=$(osmosisd query wasm contract "$STAKE" --height "$H" --node "$NODE" -o json | jq -r '.contract_info.code_id')
+
+osmosisd query wasm code-info "$DAO_CODE" --height "$H" --node "$NODE" -o json
+osmosisd query wasm code-info "$STAKE_CODE" --height "$H" --node "$NODE" -o json
 ```
 
-## Legacy config and balances
-
-```bash
-osmosisd query wasm contract-state smart "$DAO" '{"get_config":{}}' --node "$NODE" -o json
-osmosisd query wasm contract-state smart "$DAO" '{"proposal_count":{}}' --node "$NODE" -o json
-osmosisd query wasm contract-state smart "$DAO" '{"token_list":{"start":null,"limit":30,"order":"asc"}}' --node "$NODE" -o json
-osmosisd query bank balances "$DAO" --node "$NODE" -o json
-
-osmosisd query wasm contract-state smart "$STAKE" '{"get_config":{}}' --node "$NODE" -o json
-osmosisd query wasm contract-state smart "$STAKE" '{"total_power_at_height":{}}' --node "$NODE" -o json
-osmosisd query wasm contract-state smart "$STAKE" '{"total_value":{}}' --node "$NODE" -o json
-osmosisd query bank balances "$STAKE" --node "$NODE" -o json
-osmosisd query bank total-supply-of uion --node "$NODE" -o json
-```
-
-## Proposals
-
-The maximum page size is 30. `proposals.start` is the last proposal ID and is exclusive.
+## Legacy configuration and aggregates
 
 ```bash
 osmosisd query wasm contract-state smart "$DAO" \
-  '{"proposals":{"query":{"everything":{}},"start":null,"limit":30,"order":"asc"}}' \
-  --node "$NODE" -o json
+  '{"get_config":{}}' --height "$H" --node "$NODE" -o json
 
 osmosisd query wasm contract-state smart "$DAO" \
-  '{"proposals":{"query":{"everything":{}},"start":30,"limit":30,"order":"asc"}}' \
-  --node "$NODE" -o json
+  '{"paused":{}}' --height "$H" --node "$NODE" -o json
+
+osmosisd query wasm contract-state smart "$STAKE" \
+  '{"get_config":{}}' --height "$H" --node "$NODE" -o json
+
+osmosisd query wasm contract-state smart "$STAKE" \
+  '{"info":{}}' --height "$H" --node "$NODE" -o json
+
+osmosisd query wasm contract-state smart "$STAKE" \
+  '{"total_power_at_height":{"height":null}}' --height "$H" --node "$NODE" -o json
+
+osmosisd query wasm contract-state smart "$STAKE" \
+  '{"total_value":{}}' --height "$H" --node "$NODE" -o json
 ```
 
-## Deposits
+## Balances and supply
 
-Deposit pagination is easy to get wrong. `start` is inside `query.everything` and is a composite `[proposal_id, depositor]`. A top-level `start` is ignored by this legacy interface.
+```bash
+osmosisd query bank balances "$DAO" --height "$H" --node "$NODE" -o json
+osmosisd query bank balances "$STAKE" --height "$H" --node "$NODE" -o json
+osmosisd query bank total-supply-of uion --height "$H" --node "$NODE" -o json
+```
 
-First page:
+Do not rely on the legacy token list as an exhaustive balance source.
+
+## Proposal and deposit pagination
+
+Proposal pagination uses proposal IDs. Deposit pagination uses the composite `(proposal_id, depositor)` key nested inside `query.everything.start`.
+
+First deposit page:
 
 ```bash
 osmosisd query wasm contract-state smart "$DAO" \
   '{"deposits":{"query":{"everything":{"start":null}},"limit":30,"order":"asc"}}' \
-  --node "$NODE" -o json
+  --height "$H" --node "$NODE" -o json
 ```
 
-For the next page, substitute the exact last `(proposal_id, depositor)` from the preceding page:
+For the next page, use the final tuple from the previous result:
 
-```bash
-osmosisd query wasm contract-state smart "$DAO" \
-  '{"deposits":{"query":{"everything":{"start":[LAST_ID,"LAST_DEPOSITOR"]}},"limit":30,"order":"asc"}}' \
-  --node "$NODE" -o json
+```json
+{
+  "deposits": {
+    "query": {
+      "everything": {
+        "start": [25, "LAST_DEPOSITOR_ADDRESS"]
+      }
+    },
+    "limit": 30,
+    "order": "asc"
+  }
+}
 ```
 
-Continue until the response is empty. Assert key uniqueness.
+Do not place `start` beside `query`; the legacy deserializer ignores that shape.
 
 ## Stakers and claims
 
-Staker pagination uses the last address as `start_at`:
+The staker map is address-paginated with an exclusive `start_at`. Every page must use `--height "$H"`.
 
 ```bash
 osmosisd query wasm contract-state smart "$STAKE" \
   '{"range_stakers":{"start_at":null,"limit":30,"order":"asc"}}' \
-  --node "$NODE" -o json
+  --height "$H" --node "$NODE" -o json
 ```
 
-For every returned historical address:
+For each returned address:
 
 ```bash
 osmosisd query wasm contract-state smart "$STAKE" \
   '{"claims":{"address":"STAKER_ADDRESS"}}' \
-  --node "$NODE" -o json
+  --height "$H" --node "$NODE" -o json
 ```
 
-Sum active values and claims in integer atomic units. Verify:
+Verify:
 
 ```text
-active ION value + outstanding ION claims = staking contract ION bank balance
+active backing + sum(all claims) == stake-contract uion bank balance
 ```
 
-If pagination spans many blocks, pin a height or prove the aggregate still reconciles to a retained-height balance. Do not call a moving multi-hour scrape a single-height snapshot without this qualification.
+Retain page inputs and outputs so another reviewer can prove no address was skipped.
 
-## DAO DAO code registry and live code
-
-Pin the DAO DAO UI registry commit before reading code IDs. Then query the selected IDs:
+## IBCX control state
 
 ```bash
-for id in 1571 1574 1579 1581 1588; do
-  osmosisd query wasm code-info "$id" --node "$NODE" -o json
+export IBCX_NEW='osmo14klwqgkmackvx2tqa0trtg69dmy0nrg4ntq4gjgw2za4734r5seqjqm4gm'
+export IBCX_ST='osmo1xqw2sl9zk8a6pch0csaw78n4swg5ws8t62wc5qta4gnjxfqg6v2qcs243k'
+export IBCX_OLD='osmo1yhd9tzp09d833u7ray4pudxjnx2q7zcq2s0g9r7cl2w73mj5qqcjwhxt'
+
+for A in "$IBCX_NEW" "$IBCX_ST" "$IBCX_OLD"; do
+  osmosisd query wasm contract "$A" --height "$H" --node "$NODE" -o json
+  osmosisd query wasm contract-state smart "$A" \
+    '{"config":{}}' --height "$H" --node "$NODE" -o json
+  osmosisd query bank balances "$A" --height "$H" --node "$NODE" -o json
 done
 ```
 
-Query at least one contract instantiated from each module code and require CW2 `2.7.0`. Verify code hashes against reproduced Wasm and a second endpoint.
+If the exact query variant differs, inspect the pinned schema/source rather than guessing. Preserve `gov`, `pending_gov`, fee collector, pause/rebalance state, and backing balances.
 
-Factory:
+## DAO DAO artifacts
 
 ```bash
-export FACTORY='osmo1qpszqk458arkkdff5z4vrqlqv4k2n9a0tjme23vn00uyt30nrr7sfe87cv'
-osmosisd query wasm contract "$FACTORY" --node "$NODE" -o json
-osmosisd query wasm contract-state smart "$FACTORY" '{"admin":{}}' --node "$NODE" -o json
+for ID in 1571 1574 1579 1581 1588; do
+  osmosisd query wasm code-info "$ID" --height "$H" --node "$NODE" -o json
+done
+
+osmosisd query wasm contract "$FACTORY" --height "$H" --node "$NODE" -o json
+osmosisd query wasm contract-state smart "$FACTORY" \
+  '{"admin":{}}' --height "$H" --node "$NODE" -o json
 ```
 
-This recipe is discovery only. It does not prove a future production payload.
+Also pin the DAO DAO UI registry commit and the `dao-contracts` tag/commit. Live code state is authoritative for what executes; source reproduction is required before deployment.
+
+## CW20/CW721 discovery
+
+Bank state is insufficient. Document:
+
+- known token/collection balance queries;
+- historical Wasm transfer/send/receive event search;
+- indexed account-contract holdings results;
+- project manifest comparison;
+- archive/indexer gaps.
+
+## Second-endpoint verification
+
+Repeat at the exact same `H` through a second archive endpoint:
+
+- block hash/app hash;
+- governance/stake contract info and code hashes;
+- treasury/stake balances;
+- supply;
+- proposal/deposit boundaries;
+- IBCX control state.
+
+Mismatch is an abort condition.
+
+## Production boundary
+
+The retained height above is evidence for this roadmap, not a production amount. Before each transition proposal:
+
+1. choose and publish a new archive height;
+2. repeat every relevant query at that height;
+3. retain raw responses and hashes;
+4. recompute refunds, proposal deposits, balances, threshold margins, and product controls;
+5. independently review before signing.

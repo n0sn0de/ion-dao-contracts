@@ -1,193 +1,222 @@
 # Recommended ION DAO DAO production configuration
 
-These values are recommendations for the eventual governance proposal. They are not an executable instantiate message.
-
-The rule is simple: retain a legacy value only when it is still defensible. Do not clone old settings because they are old, and do not enable new modules because the product menu is shiny.
+These are review recommendations, not executable JSON. Exact production messages must be generated from the pinned schemas and independently simulated.
 
 ## Core
 
 | Field | Recommended value | Rationale |
-| --- | --- | --- |
-| Name | `ION DAO` | Stable identity; do not append operator branding |
-| Description | A concise statement that ION holders govern the treasury and protocol/public-goods decisions | The legacy description is too thin to explain scope |
-| Image URL | Immutable IPFS URI reviewed with the proposal | Avoid mutable hosted branding |
-| DAO URI | Immutable IPFS URI for charter, addresses, risks, and governance policy | Gives the UI and chain a durable source of governance context |
-| Internal admin | Core itself (`admin: None` at instantiate) | No wallet or external DAO receives privileged admin messages |
-| CosmWasm admin | Core itself through `cw-admin-factory` | Future migrations are self-governed; no Osmosis governance dependency |
-| Automatically add CW20s | `false` | Prevent unsolicited CW20 callbacks from polluting treasury discovery |
-| Automatically add CW721s | `false` | Prevent unsolicited NFT callbacks from polluting treasury discovery |
-| Initial items | Empty unless a reviewed immutable manifest hash is stored | Avoid decorative state and hidden dependencies |
-| Initial actions | Empty | Keep bootstrap deterministic; perform no unrelated action while creating the DAO |
+|---|---|---|
+| Name | `ION DAO` | Preserve recognizable identity |
+| Description | Explicitly identify this as the DAO DAO successor and link the archived legacy address | Prevent UI/address confusion |
+| DAO URI | Immutable governance charter and migration manifest URI | Keep policy and receipts discoverable |
+| Image URL | Community-approved immutable asset or `null` | Do not depend on a dead project domain |
+| Automatically add CW20s | `false` | Prevent unsolicited CW20 receive callbacks from polluting the core registry |
+| Automatically add CW721s | `false` | Prevent unsolicited NFT receive callbacks from polluting the core registry |
+| Internal admin | `null` at instantiate, causing self-admin | No wallet or deployer control |
+| Wasm admin | Core itself through the self-admin factory | Upgrades remain token-governed |
+| Initial items | Manifest hash, legacy address, evidence height, and charter URI only | Make continuity machine-readable |
+| Initial actions | Empty | Do not hide authority or asset movement in instantiate |
 
-### Admin invariant
+The successor should be predeployed empty with ordinary `InstantiateContractWithSelfAdmin`. A deterministic address is unnecessary once deployment and treasury handoff are separate. Do not publish or rely on production `Instantiate2` salts.
 
-The production receipt must prove both layers:
+## Admin topology
 
-1. DAO DAO core query `admin` returns the core address.
-2. Osmosis `wasm contract` query reports the core address as the core's CosmWasm admin.
+| Contract | Internal/application admin | CosmWasm admin |
+|---|---|---|
+| New DAO core | Core itself | Core itself |
+| New voting module | Core/DAO relation | New core |
+| New proposal module | New core | New core |
+| New pre-propose module | Proposal/core relation | New core |
+| Legacy stake during Phase 2 | Legacy DAO | Legacy DAO |
+| Legacy stake after final handoff | New core | New core |
+| Approved IBCX application contracts after acceptance | New core | New core after final handoff |
 
-Proposal, voting, pre-propose, and optional Security Council child modules must report the core (or their own council core) as CosmWasm admin. The factory and deployer must retain nothing.
+Factory and deployer retain nothing.
 
-### Legacy stake wind-down admin
+### Exact legacy stake updates
 
-The old stake contract continues to hold user funds while holders exit. In the same atomic cutover, set both its internal config admin and its CosmWasm migration admin to the new ION DAO core, while setting only the legacy exit duration to `None`.
+`UpdateConfig` assigns both fields unconditionally. Omitting `admin` is not “preserve current”; it becomes `None`.
 
-This does not migrate storage or move custody. It preserves a self-governed recovery path if a later audited fix is needed after the old governance contract is permanently paused. Leaving either admin layer on the paused old DAO would recreate an Osmosis-governance dependency.
+Transition-enabling proposal:
+
+```json
+{
+  "update_config": {
+    "admin": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+    "duration": null
+  }
+}
+```
+
+Final handoff proposal:
+
+```json
+{
+  "update_config": {
+    "admin": "NEW_SUCCESSOR_CORE",
+    "duration": null
+  }
+}
+```
+
+The final proposal must also transfer the legacy stake contract’s CosmWasm admin to `NEW_SUCCESSOR_CORE`.
 
 ## Voting module
 
-Use `dao-voting-token-staked` with the existing native denom `uion`.
+Use `dao-voting-token-staked` with the existing native `uion` denom.
 
 | Field | Recommended value | Rationale |
-| --- | --- | --- |
-| Token | Existing native denom `uion` | No new token, wrapper, issuer, or custody layer |
-| Voting ratio | 1 atomic ION staked = 1 voting-power unit | Legible and supported by DAO DAO UI |
-| Active threshold | `3%` of current total supply | Requires meaningful migration before governance activates; scales if supply changes |
-| Unstaking duration | 7 days | Keeps voting capital committed for one five-day vote plus notice margin without preserving the legacy 14-day drag |
-| Delegation module | `None` at launch | Avoid proxy concentration and another contract until ION has an explicit delegation policy |
-| Hooks | None at launch | No unreviewed callback surface |
+|---|---|---|
+| Token | Existing native `uion` | Do not create a replacement ION token |
+| Unstaking duration | 7 days | Covers the five-day vote plus operational notice while improving on 14 days |
+| Active threshold | Dynamic 3% of current ION supply | Prevent dust activation |
+| Delegation module | `null` at launch | Reduce launch complexity and proxy capture surface |
 
-At height `66276760`, a 3% threshold was `638.79044898 ION`; the serialized threshold rounds according to DAO DAO's contract rules. Recompute from live supply and validate the exact atomic threshold behavior before proposal freeze.
+The serialized active threshold is percentage `0.03`. On every `IsActive` query, the contract reads current bank supply and ceilings 3% to atomic units.
 
-### Why not a zero active threshold
+At snapshot supply `21,293.014966 ION`:
 
-Without an active threshold, a dust holder could activate an otherwise empty successor immediately after deployment. Quorum is measured against staked power, not total supply, so low initial stake can turn a small holder into a temporary dictator.
+```text
+3% = 638.79044898 ION
+contract ceiling = 638.790449 ION
+```
 
-### Why not copy the 14-day legacy unbond
+A supply increase can deactivate the DAO without an unstake. The final handoff gate therefore requires at least 4% staked, not merely the 3% boundary.
 
-Fourteen days is defensible for some high-value protocols, but it doubles the recommended vote period and makes the holder transition unnecessarily sticky. Seven days keeps capital exposed through the governance cycle while reducing exit friction. It can be changed only by the DAO later.
+### What the active threshold does not solve
 
-### Whale limitation
-
-Standard token-staked DAO DAO voting does not cap per-address power. The prior-operator vesting address currently has enough spendable plus already-staked ION to exceed 50% of the resulting staked pool if it stakes all presently spendable holdings while other stakes stay constant. Active threshold and quorum do not fix that.
-
-Do not pretend configuration can delete token concentration. The available mitigations are notice, revoting, unbonding, monitoring, a bounded veto window, treasury compartmentalization, or a custom voting module. A custom cap/quadratic module is not recommended for the quick launch because it adds audit and UI risk.
+It does not cap address-level voting power. The prior-operator vesting concentration can exceed half of the resulting staked pool if all presently spendable ION is staked while other stake remains constant. Address-specific caps require a custom voting system, alter token rights, and need separate legitimacy/UI/audit analysis.
 
 ## Single-choice proposal module
 
 | Field | Recommended value | Rationale |
-| --- | --- | --- |
-| Threshold | Strict majority of non-abstain votes | Familiar, legible, and avoids minority rule |
-| Quorum | 30% of total voting power at proposal snapshot | Retains the quorum adopted by ION proposal 4; historical successful participation exceeded it, while 20% is weak for a concentrated treasury DAO |
-| Maximum voting period | 5 days | Two days shorter than legacy while preserving weekday/weekend notice |
-| Minimum voting period | 48 hours | Prevents instant passage if revoting is ever disabled later |
-| Allow revoting | `true` | Gives holders time to react to new information and forces the full five-day window |
-| Only members execute | `false` | Execution carries only the already-approved payload; permissionless execution improves liveness |
-| Close on execution failure | `false` | Prevents a griefing caller from permanently closing a valid proposal after a transient failure |
-| Delegation module | `None` | Match voting-module launch scope |
+|---|---|---|
+| Threshold | Strict majority | More Yes than No among opinionated votes |
+| Quorum | 30% | Matches the established participation expectation |
+| Maximum voting period | 5 days | Shorter than legacy seven days without reducing notice below a business week |
+| Minimum voting period | 48 hours | Prevent immediate execution if revoting is changed later |
+| Allow revoting | `true` | Makes vote changes explicit and prevents early completion |
+| Only members execute | `true` | Reduce outsider execution-grief surface |
+| Close on execution failure | `true` | Avoid permanent passed-but-unexecuted zombie proposals and indefinite bond escrow |
+| Veto config | `null` | No unreviewed external veto authority |
 
-Because revoting is enabled, proposals do not pass early. This is intentional. The old DAO's seven-day window plus no modern timelock is not a reason to let a whale push a proposal through before the community sees it.
-
-### Execution-failure caveat
-
-Retryable proposals can remain executable after the original vote. Proposal authors must use explicit expirations and bounded payloads for time-sensitive actions. The UI and monitoring should flag old passed-but-unexecuted proposals.
+`close_proposal_on_execution_failure = true` trades retryability for finality. A voting member could still execute at a bad time. Production proposals must avoid unstated external preconditions, and the UI/runbook must state when execution is safe. If the community prefers retryability, it must also accept that a failed Passed proposal can retain its `OnlyPassed` bond indefinitely.
 
 ## Pre-propose module
 
-Use `dao-pre-propose-single`.
-
 | Field | Recommended value | Rationale |
-| --- | --- | --- |
-| Submission policy | DAO members only; empty allowlist; empty denylist | Stops nonmembers from buying proposal spam access with a deposit |
-| Deposit denom | Native `uion` | Aligns incentives with ION holders |
-| Deposit amount | `1 ION` | Twice the legacy target, still only about 0.0047% of current supply |
-| Refund policy | `OnlyPassed` | Passed proposals get their bond back; rejected proposals pay a modest attention cost to the treasury |
+|---|---|---|
+| Submission policy | Specific: `dao_members = true`, empty allowlist and denylist | Only stakers may consume governance attention |
+| Deposit | Exactly `1,000,000 uion` / 1 ION | Material spam bond without reproducing partial-top-up logic |
+| Refund policy | `OnlyPassed` | Refund only after successful proposal execution |
 
-DAO DAO collects the required deposit atomically in one pre-propose call. It does not reproduce the legacy partial-deposit/top-up path that enabled inconsistent accounting.
+Important semantics:
 
-A 1 ION bond is a starting value, not scripture. Review it after six months using actual proposal volume, rejection rate, and token value. Do not index it to a dollar feed without an audited oracle.
+- `OnlyPassed` is refunded for `Status::Executed`, not merely `Status::Passed`.
+- Rejected or execution-failed proposal handling must be verified against the exact completion hook.
+- With retryable execution failures, a Passed proposal’s bond can remain escrowed indefinitely.
+- Deposit settlement must be tested exactly once for Executed, Rejected, Closed, and ExecutionFailed statuses.
 
-## Veto and timelock profiles
+### Pre-propose balance withdrawal
 
-The production proposal must select one profile explicitly.
+The withdrawal path transfers the **entire selected-denom balance**. It does not calculate “excess over outstanding deposits.”
 
-### Profile A — minimal trust
-
-```text
-veto = None
-```
-
-Use this only if the community cannot appoint a credible, accountable council before cutover.
-
-Advantages:
-
-- no privileged vetoer;
-- least code and governance overhead;
-- pure token governance.
-
-Risks:
-
-- no timelock after passage;
-- concentrated voting power can execute treasury actions immediately after the five-day vote;
-- no emergency stop between passage and execution.
-
-### Profile B — bounded security (recommended if membership is ready)
+Never withdraw while refundable deposits remain. Required gate:
 
 ```text
-vetoer = Security Council DAO core
-veto timelock = 48 hours
-early_execute = false
+sum(outstanding refundable deposit liabilities) == 0
 ```
 
-Council design:
+Then query the selected denom balance, withdraw the entire balance once, and reconcile the receiving treasury. Add a negative test proving that withdrawal with outstanding bonds would break later refunds.
 
-- separate member-based DAO DAO core;
-- five publicly named, independent members;
-- three-of-five threshold;
-- no treasury;
-- no role as main-core admin;
-- no arbitrary execution mandate;
-- sole charter: veto objectively malicious, exploit-driven, or payload-mismatched proposals during the 48-hour window;
-- public rationale required for every veto;
-- main ION DAO can replace the vetoer through governance, with that change itself passing through the existing timelock.
+## Veto and Security Council
 
-The council is a circuit breaker, not a second legislature. It must not veto ordinary policy disagreement.
+Baseline production configuration: `veto = null`.
 
-If five credible members and monitoring cannot be assembled, use Profile A. A fake “security council” composed of one operator and four sleepy friends is centralization theater.
+A future council is a separate design, not part of this launch recommendation. Before recommending one, publish and test:
 
-## Modules intentionally deferred
+- exact CW4 member DAO graph and all code IDs/hashes;
+- exact council threshold, voting period, revoting, execution, proposal, and deposit configuration;
+- complete four-field main proposal `VetoConfig` including `veto_before_passed`;
+- council response time shorter than the main timelock;
+- membership weights and conflict/recusal rules;
+- sunset and replacement/removal mechanics;
+- the fact that a standard council core can execute arbitrary messages unless code restricts it;
+- the fact that an incumbent vetoer may veto its own replacement;
+- a bounded Juno/Osmosis proof of the entire graph.
 
-| Feature | Launch decision | Reason |
-| --- | --- | --- |
-| Multiple-choice proposals | Defer | Single-choice covers migration and treasury actions; add when preference selection is real |
-| Vote delegation | Defer | Proxy markets and concentration need a separate policy |
-| Rewards distributor | Defer | Governance participation rewards are gameable; define metrics first |
-| Payroll factory | Defer | No approved recurring payroll mandate |
-| Token swap/vesting modules | Defer | No launch requirement |
-| Arbitrary apps | Defer | Each app needs permission and message-surface review |
-| Treasury subDAO | Evaluate after launch | Useful for bounded budgets, but should not complicate the cutover without a concrete mandate |
-| Custom capped/quadratic voting | Reject for launch | Adds bespoke consensus and UI/audit risk |
+Do not call a prose-only mandate technically bounded.
 
-## Legacy values not propagated
+## Execution and retries
 
-| Legacy behavior/config | New decision |
-| --- | --- |
-| Monolithic governance state | Modular DAO DAO graph |
-| No CosmWasm admin; Osmosis governance needed for upgrade | Self-admin core and modules |
-| 14-day unbond | 7 days in new module; `None` only for legacy exit |
-| 7-day maximum vote | 5 days plus optional 48-hour post-pass timelock |
-| 50% approval, 30% quorum, 30% token veto | Strict majority, 30% quorum; no token `NoWithVeto` option in DAO DAO single-choice |
-| Partial deposits and top-ups | One atomic exact pre-propose deposit |
-| Anyone can initiate with minimum deposit | Members-only submission |
-| 0.5 ION target / 0.05 ION minimum | 1 ION exact bond |
-| Legacy claim accounting | Standard pre-propose escrow and completion hooks |
-| Treasury token registry with only `uion` | Bank-state inventory plus DAO DAO treasury view |
-| Sparse name/description only | Reviewed image and immutable DAO URI |
-| Historical proposals in live state | Immutable legacy archive; new proposal numbering begins at A-1 |
+- A proposal must be successfully Executed before its `OnlyPassed` bond is refunded.
+- Members-only execution reduces, but does not eliminate, bad-timing execution risk.
+- Every proposal with external state preconditions must query them immediately before voting closes and before execution.
+- Failed final handoff execution must not partially mutate state; exact simulation and Cosmos transaction atomicity must be verified.
 
-## Proposal-body configuration appendix
+## Legacy holder migration
 
-The eventual proposal should include:
+The user guide must distinguish shares from value:
 
-- human-readable values from this document;
-- exact JSON for every instantiate message;
-- base64-decoded nested module messages;
-- code ID, source tag, source commit, queried code hash, and instantiate permission for every module;
-- deterministic salt in UTF-8, hex, and base64;
-- predicted addresses and independent derivation commands;
-- admin matrix before and after execution;
-- chosen veto profile and, if applicable, council members/charter;
-- exact treasury and deposit reconciliation;
-- all preflight and postflight queries.
+1. query legacy voting-power/share balance;
+2. query legacy `staked_value`;
+3. record the current share-to-backing ratio;
+4. submit `Unstake` with the **share amount**;
+5. verify received `uion` equals the contract formula;
+6. claim any prior mature claim;
+7. stake received ION in the successor;
+8. verify successor voting power.
 
-If reviewers cannot decode the proposal into this table, the proposal is not ready.
+The old stake contract remains callable forever and still accepts `Stake` and `Fund`. It cannot be retired by configuration. Mark it obsolete in every UI and document, and test a funded/share-divergence scenario before publishing the migration guide.
+
+## IBCX controls
+
+The production manifest must separately list for each IBCX-family contract:
+
+- Wasm admin;
+- application `gov`;
+- `pending_gov`;
+- fee collector;
+- accrued fee-realization requirement;
+- exact source-reviewed update and accept messages;
+- post-state receipt.
+
+Backing portfolios are user/index-token assets, not DAO treasury. The transition changes control fields only.
+
+## Metadata
+
+The legacy `UpdateConfig` replaces the entire configuration. Do not send an informal “metadata update.” Either omit it or publish an exact before/after full-config diff proving every nonmetadata field is byte-for-byte preserved.
+
+## Settings deliberately deferred
+
+- vote delegation;
+- rewards distributor;
+- multiple-choice proposals;
+- subDAOs and spending filters;
+- address-level voting caps;
+- Security Council/veto;
+- custom treasury automation;
+- token migration or replacement.
+
+Modern software does not justify enabling every feature on day one.
+
+## Required production manifest
+
+Before any binding proposal, publish:
+
+- DAO DAO tag and source commit;
+- all code IDs and live hashes;
+- instantiate permissions;
+- complete core/voting/proposal/pre-propose JSON;
+- ordinary factory self-admin instantiate message;
+- expected admin matrix;
+- active and 4% handoff thresholds at pinned supply;
+- all periods and percentage encodings;
+- exact deposit and status semantics;
+- legacy stake Phase 2 and final JSON;
+- product-control handoff messages;
+- complete treasury and liability tables;
+- final proposal deposit refund;
+- residual-fund limitations;
+- simulation receipt;
+- independent reviewer sign-off.

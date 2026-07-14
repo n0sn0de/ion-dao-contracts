@@ -1,285 +1,389 @@
 # Risk-proportionate test and acceptance plan
 
-The cutover moves governance authority and a multi-asset treasury, retires an old state machine, and asks 1,925 active stakers to use a new voting module. Testing must match that blast radius.
+The transition changes governance authority, treasury custody, legacy stake administration, and control of live IBCX contracts. The test program must match that risk.
 
-A green unit test is not permission to move the treasury. The required evidence is layered.
+## Safety rules
 
-## Test principles
+1. Production successor is predeployed empty before any authority or treasury moves.
+2. Production uses ordinary self-admin factory instantiate, not a public `Instantiate2` salt.
+3. No treasury handoff occurs while successor `IsActive == false`.
+4. Final handoff requires at least 4% of current ION supply staked, distributed participation, and a successfully executed harmless successor proposal.
+5. Every legacy `UpdateConfig` field is explicit. Omitted admin fields are test failures.
+6. IBCX backing portfolios are never treated as DAO treasury.
+7. Final proposal deposit is manually refunded before permanent pause.
+8. Every query in a production evidence package uses one archive height.
+9. No signer or broadcaster is introduced by this documentation.
 
-1. **No Osmosis production write before a frozen, independently reviewed package.**
-2. **Every derived address is checked two ways.** Use both a local instantiate2 derivation and a signed chain simulation with the factory `expect` guard.
-3. **Every balance is reconciled in atomic units.** No screenshots as accounting evidence.
-4. **User custody is tested separately from treasury custody.** The legacy stake pool is not a treasury source.
-5. **Failure tests matter more than happy-path screenshots.** Force wrong addresses, wrong admin, insufficient balances, inactive DAO, failed execution, and premature claims.
-6. **UI success is not chain success.** Verify direct smart and module queries even when daodao.zone looks correct.
-7. **Retain raw receipts.** Hash snapshots, unsigned payloads, decoded transactions, simulations, and final queries.
+## Layer 1 — source and schema review
 
-## Layer 1 — source and artifact verification
+### Legacy governance
 
-### DAO DAO source
+Confirm against the exact deployed v0.0.2 source:
 
-- checkout the exact production tag and commit;
-- verify the tag signature/history where available;
-- identify all feature flags used for Osmosis builds;
-- reproduce each Wasm artifact in the DAO DAO documented optimizer environment;
-- compare reproduced SHA-256 with the live Osmosis code hash;
-- if reproduction differs, stop and explain why before using the code ID;
-- review security advisories and changes between the Mad Scientists `2.5.0` example and candidate version;
-- confirm the UI registry still maps Osmosis to the selected code IDs.
+- self-only rules for pause and full config replacement;
+- `pause_d_a_o` serialization;
+- proposal execution ordering and transaction atomicity;
+- deposit-claimable transition before message dispatch;
+- pause blocking `ClaimDeposit`;
+- bank, Wasm execute, migrate, update-admin, and custom-message serialization;
+- inability to dynamically send an entire runtime balance;
+- inability to instantiate2 from the legacy proposal schema.
 
-### Legacy source
+### Legacy stake
 
-- pin the live governance `0.0.2` source and stake `0.0.1` source;
-- confirm execute message serialization for stake `UpdateConfig`, stake CosmWasm `UpdateAdmin`, core `UpdateConfig`, `PauseDAO`, bank sends, and the proposal wrapper;
-- verify pause is enforced on governance executes but not on direct staking contract claims/unstakes;
-- verify setting old stake duration to `None` makes new unstakes immediately liquid and does not rewrite existing claims;
-- verify transferring both old stake admin layers to the predicted new core does not alter stake, claims, or custody;
-- verify legacy proposal execution is transaction-atomic when a nested message fails.
+Confirm:
 
-### Required negative tests
+- `UpdateConfig` assigns `admin` and `duration` unconditionally;
+- omitted JSON properties deserialize to `None`;
+- `Unstake.amount` is shares;
+- payout formula under non-1:1 backing;
+- `Fund` changes backing/share ratio;
+- existing claims retain original release conditions;
+- direct unstake/claim remains available when governance is paused;
+- contract has no retire, pause, generic sweep, or DAO-reference update.
 
-- wrong DAO DAO code ID;
-- code ID with correct CW2 name but wrong hash;
-- factory with a non-null internal admin;
-- factory with unexpected CosmWasm admin;
-- module admin set to deployer instead of core;
-- only one of the two legacy stake admin layers transferred;
-- core internal admin set to external address;
-- automatic token discovery accidentally enabled;
-- unreviewed proposal module included.
+Required negative test:
 
-Gate: exact artifact/hash/admin matrix signed off by two reviewers.
+```json
+{"update_config":{"duration":null}}
+```
 
-## Layer 2 — deterministic payload validation
+must demonstrate that omitted `admin` burns the internal admin. Production fixtures must reject this shape.
 
-For the full candidate instantiate message:
+### DAO DAO v2.7.0
 
-- encode nested pre-propose, proposal, voting, and core JSON canonically;
-- decode every base64 field back to JSON and compare byte-for-byte with the reviewed files;
-- publish salt as UTF-8, hex, and base64;
-- derive core and child addresses locally;
-- set factory `expect` to the derived core address;
-- simulate with a deliberately wrong `expect` and require failure;
-- simulate with the correct `expect` and require the predicted instantiate/admin events;
-- decode the complete legacy proposal messages after transaction generation;
-- reject extra messages, receivers, denoms, funds, hooks, initial actions, or admins.
+Review exact tag/source for:
 
-Gate: machine manifest and human table agree exactly.
+- core self-admin behavior;
+- ordinary self-admin factory instantiate;
+- child-module admin assignment;
+- dynamic active-threshold ceiling;
+- proposal inactivity rejection;
+- revoting completion behavior;
+- `only_members_execute` enforcement;
+- `close_proposal_on_execution_failure` behavior;
+- `OnlyPassed` refund only for successfully Executed status;
+- pre-propose whole-denom withdrawal semantics;
+- proposal and voting snapshots;
+- native `uion` acceptance.
 
-## Layer 3 — state-export and accounting tests
+### IBCX contracts
 
-Run the complete snapshot at one height.
+For all three controlled products, pin exact source/code and test:
 
-### Governance and deposits
+- `realize` semantics;
+- fee-collector update;
+- `update_gov` authorization and pending state;
+- `accept_gov` authorization;
+- Wasm admin transfer;
+- current backing portfolios unchanged by control messages.
 
-- export all 39 proposals, status transitions, total/base deposits, claimability, and execution messages;
-- export every deposit using correct composite-key pagination;
-- verify there are no duplicate or skipped keys;
-- compute separate sums for claimable, passed-but-unexecuted, forfeited, nominal exploit principal, and unsafe overage;
-- independently reproduce the cutover ION amount from raw rows;
-- query contract bank balances before and after every arithmetic classification.
+## Layer 2 — height-pinned state export
 
-### Staking
+At archive height `H`, retain raw responses for:
 
-- export every historical staker address;
-- query each current stake and all claims;
-- assert nonzero-staker count, active total, claim count, and claim total;
-- assert active total plus claims equals staking ION bank custody;
-- verify the latest claim maturity against the snapshot time;
-- identify non-ION balances separately;
-- do not assign non-ION stake-contract dust to users or treasury without a contract path and governance policy.
+- block header and app hash;
+- legacy contract info, code info, CW2, config, pause state, migration history;
+- every proposal, vote aggregate, deposit, and claimability flag;
+- legacy DAO bank balances;
+- old stake config, shares, backing, claims, and bank balances;
+- ION supply;
+- IBCX contract config/control/admin/balances;
+- successor config/admin/module graph after deployment.
 
-### Treasury
+### Complete asset discovery
 
-- query all bank balances, not only legacy `token_list`;
-- query metadata and supply for every denom where possible;
-- verify transferability/freeze/admin status for tokenfactory assets;
-- determine whether IBC paths are live or merely historical;
-- ensure no CW20/CW721 holdings are missed by bank-only queries;
-- repeat the full inventory immediately before proposal submission and execution.
+Native bank inventory is necessary but not sufficient.
 
-Gate: accounting equation balances and no asset is silently omitted.
+Also:
 
-## Layer 4 — local integration harness
+1. query known CW20/CW721 contracts;
+2. scan historical transfer/send/receive events involving the legacy address;
+3. use at least one indexed account/contract holdings source;
+4. compare project manifests and prior disclosures;
+5. record archive/indexer gaps explicitly.
 
-Build a test harness containing:
+Do not assert exhaustive absence of CW20/CW721 assets from bank queries.
 
-- legacy ION governance `0.0.2`;
-- legacy stake `0.0.1`;
-- DAO DAO factory/core/voting/proposal/pre-propose exact candidate Wasm;
-- native `uion` supply and representative holders;
-- representative treasury denoms;
-- old stakers and mature/unmatured claims;
-- proposals/deposits covering all reconciliation classes.
+## Layer 3 — local deterministic tests
 
-### Happy path
+### Successor instantiate fixture
 
-1. pass the legacy cutover proposal;
-2. execute refunds;
-3. set old stake duration to `None`;
-4. instantiate deterministic self-admin DAO DAO graph;
-5. transfer all approved treasury assets;
-6. pause legacy governance forever;
-7. claim an old mature claim;
-8. unstake an old active position immediately;
-9. stake in the new module;
-10. activate the new DAO;
-11. submit, vote, execute, and close/refund new proposals.
+Validate exact production JSON against schemas and Rust types. Assert:
 
-### Failure path matrix
+- core internal and Wasm admin = self;
+- voting/proposal/pre-propose Wasm admins = core;
+- existing `uion` configured;
+- dynamic 3% active threshold;
+- seven-day unbond;
+- majority/30%/five-day/48-hour parameters;
+- revoting enabled;
+- members-only execution enabled;
+- close-on-execution-failure enabled;
+- 1 ION pre-propose bond;
+- `OnlyPassed` semantics;
+- no veto/delegation module;
+- no initial actions or production treasury.
 
-| Case | Required result |
-| --- | --- |
-| One refund exceeds balance | Whole cutover reverts |
-| One treasury denom changed | Whole cutover reverts or retained delta is explicitly expected |
-| Wrong factory expected address | Instantiation fails and whole cutover reverts |
-| Wrong child code hash/ID | Preflight rejects; no execution |
-| Proposal module admin is wallet | Acceptance fails |
-| New active threshold unmet | Propose fails; treasury cannot be governed yet |
-| Nonmember proposes | Pre-propose rejects |
-| Exact 1 ION deposit absent | Propose rejects |
-| Rejected proposal | Deposit follows `OnlyPassed` policy |
-| Passed proposal | Deposit returns exactly once |
-| Execution transiently fails | Proposal remains retryable |
-| Old governance paused | New old-governance execute calls fail |
-| Old stake claim after pause | Claim still succeeds |
-| New old-stake unstake after duration removal | Immediate return succeeds |
-| Existing old claim | Original release condition preserved |
-| Unexpected token sent to core | Automatic CW token lists do not mutate |
+### Active-threshold tests
 
-Gate: full suite runs from a clean checkout in CI.
+Test:
 
-## Layer 5 — completed Juno mainnet proof
+- below 3%: propose fails `InactiveDao`;
+- exactly contract ceiling: active;
+- supply increase above current margin: DAO can deactivate;
+- 4% handoff margin at current supply;
+- no wallet/admin path can lower threshold while inactive.
 
-The bounded Juno proof established:
+### Proposal deposit matrix
 
-- exact DAO DAO `2.7.0` core, proposal, pre-propose, voting, and factory Wasm hashes matching the selected Osmosis deployments;
-- instantiate2 predicted core address enforced by factory `expect`;
-- core internal and CosmWasm self-admin;
-- child module admins set to core;
-- existing native-denom staking;
-- active threshold;
-- members-only pre-propose;
-- exact `OnlyPassed` deposit;
-- auto-vote and snapshot voting power;
-- revoting-safe full voting expiry;
-- permissionless execution of an approved bank send;
-- deposit refund on execution;
-- unstake claim and final recovery;
-- direct rendering in daodao.zone, including the executed proposal.
+| Scenario | Expected result |
+|---|---|
+| Successfully executed proposal | Deposit refunded exactly once |
+| Passed but not executed | Deposit remains escrowed |
+| Execution fails with close-on-failure | Final status and deposit destination match exact completion hook |
+| Rejected proposal | Deposit follows reviewed non-executed policy |
+| Duplicate completion hook | Rejected |
+| Deposit amount/denom mismatch | Rejected |
+| Nonmember propose | Rejected |
 
-See [`JUNO-VALIDATION.md`](JUNO-VALIDATION.md).
+### Pre-propose withdrawal matrix
 
-The test intentionally used short block durations and one JUNO. It did not test Osmosis-specific legacy execution, ION distribution, production periods, or treasury amounts.
+- with any outstanding refundable deposit: withdrawal forbidden by runbook/test gate;
+- with zero outstanding liabilities: entire selected-denom balance transfers once;
+- negative test: force withdrawal with an outstanding bond and prove later refund would fail;
+- never call this an “excess-only” withdrawal.
 
-## Layer 6 — Osmosis signed simulations
+### Legacy stake migration matrix
 
-No broadcast.
+Test both 1:1 and funded/non-1:1 cases:
 
-### New graph only
+1. query shares and staked value;
+2. unstake share amount;
+3. verify formula payout;
+4. preserve existing claim maturity;
+5. stake received ION in successor;
+6. reconcile total user value excluding fees.
 
-From a funded nonproduction account or the exact legacy proposal execution context where simulation supports it:
+Test that the legacy contract remains callable after all users exit and can still receive `Stake`/`Fund` calls. UI retirement, not contract retirement, is the available control.
 
-- simulate the factory instantiate2 message;
-- retain gas, events, predicted addresses, admin update, and contract versions;
-- query that expected addresses are absent before any real execution;
-- validate module initialization against the manifest.
+### Exact legacy stake admin fixtures
 
-### Full legacy proposal
+Phase 2 expected post-state:
 
-Generate the exact legacy `Propose` call and later `Execute` call.
+```text
+internal admin = legacy DAO
+Wasm admin     = legacy DAO
+duration       = None
+```
 
-- sign without broadcasting;
-- submit tx bytes to `/cosmos/tx/v1beta1/simulate`;
-- require code `0` and a complete nested event trace;
-- verify every refund receiver and amount;
-- verify every treasury receiver, denom, and amount;
-- verify old stake config event and internal-admin handoff;
-- verify old stake CosmWasm admin-update event;
-- verify core and child instantiate events;
-- verify final legacy pause event;
-- compare gas used against the configured transaction gas with at least a 40% safety margin;
-- repeat against a second endpoint.
+Final handoff expected post-state:
 
-Simulation from the wrong sender is not evidence. Authorization and message context must match production.
+```text
+internal admin = successor core
+Wasm admin     = successor core
+duration       = None
+```
 
-Gate: two independent reviewers decode the signed transaction and simulation.
+Reject fixtures where either layer is omitted or transferred early.
 
-## Layer 7 — canary policy
+### Final proposal deposit
 
-Do not move treasury to a separately deployed “canary DAO” and later repeat governance. That creates a second production address and extra vote.
+Model a final proposal funded with exactly 0.5 ION:
 
-The Juno deployment is the cross-chain canary. On Osmosis, the one atomic cutover is the production event. Risk is bounded by preflight, deterministic address enforcement, atomic rollback, active threshold, and a fully reconciled terminal legacy balance.
+- execution marks its deposit claimable;
+- first BankMsg manually refunds exactly 0.5 ION to documented depositor;
+- permanent pause follows only after all other approved transfers;
+- later `ClaimDeposit` is blocked but no physical liability remains;
+- receipt labels the record manually settled.
 
-If reviewers insist on an Osmosis canary, it must use a clearly named disposable DAO, dust-only funds, distinct salts, and no production authority. It cannot substitute for the full signed legacy simulation.
+### Residual-fund test
 
-## Layer 8 — post-cutover verification
+Send an unsolicited coin to legacy governance after final payload construction. Verify:
 
-Run immediately after execution and again after 1 hour, 24 hours, 7 days, and 30 days.
+- static BankMsg transfer does not sweep the extra coin;
+- final pause strands it;
+- documentation reports residual rather than claiming zero balance;
+- no hidden recovery path exists without chain-level authority.
 
-### Immediate
+## Layer 4 — empty Osmosis predeployment
 
-- transaction code, height, block ID, gas, and event trace;
-- all contract addresses, code IDs, hashes, versions, creators, and admins;
-- exact module graph and enabled status;
-- all configuration queries;
-- all treasury balances;
+Use ordinary factory `InstantiateContractWithSelfAdmin`.
+
+Before broadcasting:
+
+- pin code IDs/hashes and instantiate permissions;
+- validate exact nested JSON;
+- simulate the signed transaction;
+- verify gas margin and fees;
+- ensure no production funds are attached.
+
+After inclusion:
+
+- record tx hash, height, core and module addresses;
+- query full admin matrix;
+- verify no deployer/factory admin;
+- verify core/module CW2 identities;
+- verify zero production authority/treasury;
+- load direct daodao.zone pages;
+- abandon the graph if anything differs.
+
+No salt or predicted address is a production dependency.
+
+## Layer 5 — transition-enabling proposal simulation
+
+Simulate exact legacy proposal execution including:
+
+- full `UpdateConfig` with legacy admin and `duration:null`;
+- IBCX `pending_gov` updates;
+- unchanged IBCX fee collectors and Wasm admins;
+- no treasury transfer;
+- no permanent pause;
+- no Wasm admin handoff.
+
+Verify nested events and exact post-state. After real execution, claim its 0.5 ION deposit before proceeding.
+
+## Layer 6 — successor activation and lifecycle canary
+
+Block final handoff until:
+
+- `IsActive == true`;
+- at least 4% of current supply is staked;
+- holder distribution report is reviewed;
+- one harmless proposal completes full propose/vote/execute/deposit-refund lifecycle;
+- execution and refund receipts reconcile;
+- UI renders the result.
+
+The harmless proposal should move a dust amount already held by successor. It must not alter admins, production treasury, IBCX controls, or thresholds.
+
+## Layer 7 — IBCX acceptance
+
+Create a dedicated successor proposal that accepts application governance for approved IBCX contracts.
+
+Test and verify:
+
+- precondition `pending_gov == successor`;
+- postcondition `gov == successor`;
+- `pending_gov == none`;
+- source-reviewed fee realization after acceptance, if required;
+- approved fee collector update only after acceptance;
+- backing balances unchanged;
+- fee collector matches approved policy;
+- no unrelated message included.
+
+Do not proceed to final legacy pause if any acceptance fails.
+
+## Layer 8 — final handoff simulation
+
+After the final proposal is fully funded, export state again. Build exact static amounts from that export.
+
+Simulation must verify message order:
+
+1. final proposal 0.5 ION manual refund;
+2. every approved historical refund;
+3. legacy stake internal admin handoff with duration `None`;
+4. legacy stake Wasm admin handoff;
+5. approved IBCX Wasm admin handoffs;
+6. every approved native-denom treasury transfer;
+7. optional exact full-config metadata replacement or no metadata message;
+8. permanent legacy pause last.
+
+Require:
+
+- code 0;
+- complete nested events;
+- exact refund receivers and amounts;
+- exact treasury receiver/denoms/amounts;
+- exact old/new admin values;
+- IBCX backing balances untouched;
+- 40% gas headroom;
+- no secret or local-path leakage in retained artifacts.
+
+## Fault injection
+
+Every case must fail without partial state changes:
+
+- wrong core/module code ID or hash;
+- external core admin;
+- wrong child-module admin;
+- inactive successor;
+- successor below 4% handoff margin;
+- failed harmless proposal;
+- omitted legacy stake admin field;
+- only one stake admin layer transferred;
+- wrong IBCX `pending_gov` or current gov;
+- missing final proposal deposit refund;
+- refund above approved principal;
+- missing bank denom;
+- attempt to transfer stake-contract ION;
+- attempt to sweep IBCX backing assets;
+- stale account sequence;
+- out-of-gas nested execution;
+- final pause placed before another message;
+- disputed/unapproved policy hash.
+
+## Post-execution acceptance
+
+Immediately retain:
+
+- final transaction and nested events;
+- successor core/module dumps;
+- `IsActive` and current supply/threshold;
+- all admin relationships;
+- successor and legacy bank balances;
+- final proposal and deposit record/manual-settlement receipt;
 - legacy pause state;
-- old stake config, both admin layers, and claims;
-- terminal legacy balance after every approved refund and treasury transfer;
-- direct daodao.zone page rendering.
+- old stake config, admins, shares, backing, and claims;
+- IBCX gov/pending/admin/fee collector/backing balances;
+- direct daodao.zone rendering;
+- any unsolicited residual funds.
 
-### 1 hour
+## Holder canary sequence
 
-- no unexpected admin/config updates;
-- no unexpected proposal/module/token additions;
-- holder stake migration started;
-- old claims still payable;
-- indexer/UI pages stable.
+Before broad communication, use consenting holders with bounded amounts:
 
-### 24 hours
+1. query legacy shares/value;
+2. unstake shares;
+3. verify payout;
+4. claim existing mature claim if present;
+5. stake in successor;
+6. vote;
+7. verify voting power and UI.
 
-- voting power and holder-count reconciliation;
-- transfer, refund, and terminal-balance deltas explained;
-- monitor proposal creation attempts while inactive;
-- publish public receipt.
+Stop if value reconciliation fails or if UI directs users to the obsolete stake address.
 
-### 7 days
+## Governance-attention budget
 
-- active threshold progress;
-- first harmless production proposal lifecycle;
-- legacy/new staking migration statistics;
-- security council monitoring if enabled.
+Expected binding actions:
 
-### 30 days
+- one legacy transition-enabling vote;
+- one harmless successor lifecycle vote;
+- one successor IBCX acceptance vote;
+- one final legacy handoff vote.
 
-- decide whether the active threshold, deposit, period, and veto profile performed as intended;
-- do not change parameters solely because participation was inconvenient;
-- archive legacy UI/query instructions permanently.
+Profile-B council governance is not included. If later proposed, budget its own creation, monitoring, proposal/vote/execute cycle, and emergency drills.
 
-## Production acceptance checklist
+## Acceptance checklist
 
-- [ ] Frozen code/tag/commit/hash manifest
-- [ ] Two-endpoint code and contract verification
-- [ ] Complete state and claim export
-- [ ] Deposit reconciliation approved
-- [ ] Treasury inventory approved
-- [ ] Deterministic addresses derived twice
-- [ ] Wrong-address negative test passed
-- [ ] Local happy/failure integration suite passed
-- [x] Bounded Juno mainnet lifecycle passed
-- [x] daodao.zone rendered the Juno proof DAO and executed proposal
-- [ ] Exact Osmosis full signed simulation passed twice
-- [ ] Independent payload reviews complete
-- [ ] One public voting deadline communicated
-- [ ] Legacy proposal passed and atomic execution code `0`
+- [ ] One-height archive export retained and independently repeated
+- [ ] Complete native and documented CW20/CW721 discovery process
+- [ ] Empty successor predeployed with ordinary self-admin instantiate
 - [ ] Admin matrix verified
-- [ ] Treasury, refunds, and terminal legacy balance reconciled
-- [ ] Legacy governance paused
-- [ ] Legacy stake internal and CosmWasm admins transferred to new core
-- [ ] Old stake claims and exits verified
-- [ ] New active threshold reached by multiple holders
-- [ ] First production DAO DAO proposal executed
-- [ ] Public post-cutover receipt published
+- [ ] Phase 2 stake config preserves legacy admin explicitly
+- [ ] Transition-enabling deposit claimed
+- [ ] Successor active at or above 4% supply
+- [ ] Harmless successor proposal successfully executed
+- [ ] IBCX application governance accepted and verified
+- [ ] Final proposal deposit manually refunded
+- [ ] Every approved historical deposit settled exactly once
+- [ ] Legacy stake internal and Wasm admins transferred to successor
+- [ ] Approved IBCX Wasm admins transferred
+- [ ] Every treasury bank denom reconciled
+- [ ] IBCX backing portfolios unchanged
+- [ ] Legacy governance permanently paused last
+- [ ] Legacy stake/governance UI marked obsolete
+- [ ] Holder unstake/claim/restake canary passed
+- [ ] Residual-fund limitations disclosed
+- [ ] Raw receipts and tx hashes published
 
-No unchecked item should be hand-waved because the UI looks nice.
+Failure of any item blocks completion claims.

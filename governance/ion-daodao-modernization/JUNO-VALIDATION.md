@@ -2,7 +2,7 @@
 
 ## Scope
 
-A live Juno `juno-1` proof exercised the DAO DAO architecture recommended for ION with one native token and short block-based test periods. No Osmosis transaction was signed or broadcast.
+A live Juno `juno-1` proof exercised the DAO DAO v2.7.0 module graph with one native token and short block-based test periods. No Osmosis transaction was signed or broadcast.
 
 The proof used DAO DAO `2.7.0` artifacts whose five relevant code hashes match the selected Osmosis `2.7.0` artifacts exactly.
 
@@ -50,7 +50,7 @@ The test used values chosen to finish in minutes:
 
 These periods and amounts are not production recommendations.
 
-## Deterministic self-admin creation
+## Deterministic self-admin creation used by this test
 
 The factory `Instantiate2ContractWithSelfAdmin` message used:
 
@@ -61,19 +61,21 @@ The factory `Instantiate2ContractWithSelfAdmin` message used:
 - core internal admin `None`/self;
 - child module admin `CoreModule`.
 
-The exact signed transaction was submitted to the Cosmos SDK REST simulation endpoint before broadcast. Simulation consumed `842,347` gas and emitted the predicted core, voting, proposal, and pre-propose addresses. Broadcast then succeeded.
+The exact signed transaction was submitted to the Cosmos SDK REST simulation endpoint before broadcast. Simulation consumed `841,624` gas and emitted the predicted core, voting, proposal, and pre-propose addresses. Broadcast then succeeded.
+
+This test does **not** recommend production `Instantiate2`. Because production deployment now precedes treasury handoff, ordinary `InstantiateContractWithSelfAdmin` avoids permissionless salt-squatting and mempool-front-running risk. The Juno result proves the self-admin module graph and Wasm bytes, not the revised production sequencing.
 
 ## Transaction receipts
 
 | Step | Height | Tx hash | Gas used / wanted | Result |
 | --- | ---: | --- | ---: | --- |
-| Instantiate deterministic self-admin graph | 39,787,391 | `268E70CD839512FC215A34D36FE869D02B6A231B83460CC9087CB67B308E990F` | 842,343 / 4,000,000 | code 0; expected core and modules created |
-| Stake 1 JUNO | 39,787,556 | `BB6773A10941BE0DF9CB9B3DBF0B3D37D8E49D2F5143425B99AB0821D021E382` | 179,795 / 500,000 | code 0; DAO active |
-| Fund core with 1ujuno test payload | 39,787,560 | `FC36B94F338C296E750BF4A821CC4C837B5EE850FF144C8F7C508BD5EDC48658` | 82,768 / 200,000 | code 0 |
-| Submit proposal 1 with 0.1 JUNO deposit and auto-vote yes | 39,787,565 | `541C8036739BFC742C78784D484A9683D9F121491259657154420AE88DF82061` | 495,120 / 700,000 | code 0; voting power 1 JUNO |
-| Execute proposal 1 | 39,787,613 | `5DDAF5D694094B543D36BAC93B064467614A0AFC8BC195B92E4688BD56AEB2D8` | 319,909 / 500,000 | code 0; 1ujuno sent and deposit refunded |
-| Unstake 1 JUNO | 39,787,638 | `F1E05A9AD97895AE581BFDA7BA785E53E850075039F1126DB124169D6DE90DB9` | 155,320 / 400,000 | code 0; claim release height 39,787,640 |
-| Claim 1 JUNO | 39,787,651 | `FBAAC28852AC6DF53C788E0023D5E177E97C462B9B5642BAA0A704ED0A2AB819` | 138,474 / 350,000 | code 0; principal recovered |
+| Instantiate deterministic self-admin graph | 39,786,936 | `268E70CD839512FC215A34D36FE869D02B6A231B83460CC9087CB67B308E990F` | 845,082 / 4,000,000 | code 0; expected core and modules created |
+| Stake 1 JUNO | 39,787,529 | `C71933294F648DBE565234C8569B6B56BDA61F283B0E4AAA2E7DF699D92787DE` | 167,841 / 500,000 | code 0; DAO active |
+| Fund core with 1ujuno test payload | 39,787,535 | `FC36B94F338C296E750BF4A821CC4C837B5EE850FF144C8F7C508BD5EDC48658` | 73,644 / 200,000 | code 0 |
+| Submit proposal 1 with 0.1 JUNO deposit and auto-vote yes | 39,787,565 | `7088E5AA8FA0732DC13624277D80AE4852CFDC2DBBF9779968D56CD8783BEA2E` | 498,616 / 700,000 | code 0; voting power 1 JUNO |
+| Execute proposal 1 | 39,787,583 | `83A110BC5F6642898B8BE68EB19BFACEA3560616460282483E4DBDF5D01B3E26` | 323,344 / 500,000 | code 0; 1ujuno sent and deposit refunded after successful execution |
+| Unstake 1 JUNO | 39,787,638 | `9641965A849C44B1E42ED74CDD793883B7F9BE3E4B65D0D32D950CA3D781B46C` | 158,752 / 400,000 | code 0; claim release height 39,787,640 |
+| Claim 1 JUNO | 39,787,650 | `F2427359C96C2F68007B94FE723552387D5F63786225635D5CAB9C3E0C53A9A2` | 141,906 / 350,000 | code 0; principal recovered |
 
 Total test fees were `0.49875 JUNO`. The 1 JUNO voting stake and 0.1 JUNO proposal deposit were recovered; the 1ujuno payload returned through proposal execution.
 
@@ -89,7 +91,7 @@ Direct queries proved:
 - factory retained no deployment authority;
 - proposal 1 status = `executed`;
 - yes power = `1,000,000` atomic JUNO;
-- proposal deposit balance returned to zero after execution;
+- proposal deposit balance returned to zero after successful execution;
 - core test balance returned to zero after execution;
 - voting power returned to zero after unstake;
 - claims list returned empty after claim;
@@ -123,5 +125,8 @@ This proof does **not** establish:
 - Security Council veto behavior;
 - transferability or UI metadata for every legacy IBCX asset;
 - safe production amounts at a future height.
+- empty-successor predeployment and activation-before-handoff sequence;
+- IBCX application-governance and Wasm-admin handoff;
+- final legacy proposal deposit refund and residual-fund behavior.
 
 Those remain mandatory gates in [`TEST-PLAN.md`](TEST-PLAN.md).

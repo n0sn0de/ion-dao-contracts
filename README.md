@@ -18,6 +18,9 @@ funding preflight, and Juno mainnet proof receipts are documented in
 [`docs/ION-DAO-GOVERNANCE-PREFLIGHT.md`](docs/ION-DAO-GOVERNANCE-PREFLIGHT.md).
 The complete explorer/IPFS-ready expedited proposal package is in
 [`governance/ion-dao-remediation/`](governance/ion-dao-remediation/).
+The chain-evidence assessment and response roadmap for the historical
+developer vesting allocation are in
+[`governance/ion-prior-operator-allocation/`](governance/ion-prior-operator-allocation/).
 
 The migration quarantines unsafe legacy claims. It does not claim to identify
 or repay historical depositors.

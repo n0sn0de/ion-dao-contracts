@@ -1,238 +1,268 @@
 # ION prior-operator allocation assessment and response plan
 
-Status: **assessment and governance roadmap only**. This directory does not accuse any person of fraud, authorize confiscation, contact a recipient, create an authorization, or submit an ION/Osmosis proposal.
+Status: **technical and governance assessment only**. This package does not determine legal ownership, accuse any person of misconduct, contact a recipient, authorize confiscation, or broadcast a transaction.
 
 ## Executive conclusion
 
-The allocation was a deliberately approved ION DAO treasury spend, not a revocable grant.
+ION DAO proposal `12` is recorded as executed and created a roughly five-year `/cosmos.vesting.v1beta1.ContinuousVestingAccount` with original vesting of `3,407.04 ION`.
 
-ION proposal `12` executed a five-year `ContinuousVestingAccount` holding `3,407.04 ION` for the development contributors. The account is an ordinary recipient-controlled Cosmos auth vesting account. “Recipient-controlled” describes chain authorization, not an off-chain legal conclusion. It is not a module account, does not identify a clawback authority, and contains no milestone, service, revocation, or performance condition. The unvested amount becomes spendable automatically over time through `2028-08-24T15:00:00Z`.
+The account is:
 
-The ION DAO cannot unilaterally pull those coins back. A CosmWasm contract cannot spend from the vesting account without authorization signed by that account. Ordinary Osmosis governance messages and parameter changes do not expose a clawback switch for this account type.
+- an ordinary auth vesting account, not a module account;
+- not a `ClawbackVestingAccount`;
+- missing any funder, revoker, or admin authority;
+- controlled on-chain by its account signer;
+- locked linearly only to the extent required by the schedule ending `2028-08-24T15:00:00Z`.
 
-A forced clawback would require an extraordinary Osmosis chain software/state intervention or binding off-chain legal authority. Product abandonment, failed traction, or present token concentration alone is not a sound basis for chain-level confiscation.
+No currently available message that the ION DAO contract can validly sign authorizes conversion, key replacement, or clawback of this account. The source address acquired no continuing signer privilege when it created the account.
 
-The recommended path is:
-
-1. publish the neutral chain facts and correct the “module account” misconception;
-2. recognize the IBCX contracts and product work that was delivered;
-3. invite a time-bounded voluntary settlement for some or all of the remaining allocation;
-4. if the recipient agrees, combine an immediate return of spendable ION with a public, revocable authz/periodic-return mechanism for future vesting;
-5. if the recipient does not agree, close the negotiation without harassment and mitigate governance concentration through notice, revoting, unbonding, monitoring, an optional bounded veto council, and treasury compartmentalization;
-6. do not ask Osmosis governance to rewrite account ownership absent independently verified fraud, mistake, contractual breach with enforceable evidence, or another chain-level defect that survives due process.
-
-That is not timid. It is the difference between fixing bad incentive design and normalizing political confiscation.
-
-## What the chain proves
-
-At Osmosis height `66276784` / `2026-07-14T05:23:51.419944203Z`:
-
-- vesting recipient: `osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk`;
-- account type: `cosmos.vesting.v1beta1.ContinuousVestingAccount`;
-- original vesting: `3,407.04 ION`;
-- start: `2023-08-23T15:54:38Z`;
-- end: `2028-08-24T15:00:00Z`;
-- bank balance: `3,101.840914 ION`;
-- bank spendable: `1,662.138668 ION`;
-- bank still locked by vesting: `1,439.702246 ION`;
-- active legacy ION stake: `151.7 ION`;
-- outstanding legacy stake claims: none;
-- known bank plus staked holdings: `3,253.540914 ION`;
-- known holdings as current supply: approximately `15.2799%`;
-- known original allocation no longer held in those two locations: `153.499086 ION`.
-
-The exact vested/spendable amount changes continuously. Re-query before publishing or negotiating a number.
-
-Proposal history:
-
-- proposal `10`: first developer-allocation attempt, passed but did not execute;
-- proposal `11`: execution retry, passed but did not execute;
-- proposal `12`: revised developer funding, executed;
-- executed amount: `3,407,040,000 uion`;
-- destination: the vesting address above;
-- executed vesting type: continuous, not delayed and not clawback.
-
-The proposal rationale described the amount as roughly 16% of supply, five years of linear vesting, and approximately `$100,000` per year at the contemporary ION price. It did not record deliverables, milestones, termination, service requirements, a DAO revoker, or a return condition.
-
-## What the chain does not prove
-
-The reviewed state does **not** prove:
-
-- that the recipient committed the later legacy deposit-accounting exploit;
-- that the recipient address and exploit depositor are controlled by the same actor;
-- fraud, misrepresentation, breach of contract, or unlawful conduct;
-- that IBCX work was not delivered;
-- that product failure triggered an agreed repayment obligation;
-- that the DAO retained beneficial ownership over unvested coins;
-- that a social expectation of alignment became an enforceable on-chain condition.
-
-The deposit exploit address recorded in ION proposals `22`-`39` is different from the developer vesting address. No causal or control link was established in this review.
-
-Do not use the phrase “evidence of the exploit” to describe the vesting allocation unless new evidence actually connects them. Sloppy accusations are not accountability.
-
-## Why normal ION governance cannot claw it back
-
-A `ContinuousVestingAccount` is controlled on-chain by its account signer. Vesting changes what is spendable at a given time; it does not preserve sender custody. This statement is about chain authorization, not off-chain beneficial ownership.
-
-ION DAO governance cannot:
-
-- execute a bank send signed by the recipient;
-- alter the recipient's auth account state from CosmWasm;
-- replace the vesting address's key;
-- spend unvested coins through DAO DAO;
-- turn a continuous vesting account into a clawback account through a normal contract migration;
-- use authz without a grant signed by the recipient.
-
-The vesting account contains no funder/revoker field. The original treasury sender is not an admin.
-
-## Response roadmap
-
-### Phase 1 — publish a neutral fact package
-
-Publish:
-
-- proposal `10`-`12` descriptions and exact decoded messages;
-- current auth account JSON;
-- current bank, spendable, locked, staked, and claim queries;
-- vesting arithmetic and timestamps;
-- a plain explanation that the allocation was time-vested but not clawback-enabled;
-- a clear separation between the allocation and the later deposit exploit.
-
-Invite corrections with transaction hashes or signed agreements, not screenshots and rumors.
-
-Gate: two reviewers reproduce every number.
-
-### Phase 2 — determine whether off-chain obligations exist
-
-Before asking for a return, locate and review:
-
-- contributor agreements;
-- grant or employment terms;
-- multisig records;
-- accepted forum language incorporated by proposal;
-- milestone schedules;
-- intellectual-property assignments;
-- representations about continued operation;
-- governing law and dispute clauses.
-
-The on-chain proposal alone contains no clawback condition. If no other agreement exists, say so.
-
-Gate: counsel or a qualified reviewer distinguishes a moral request from an enforceable claim. This repository does not give legal advice.
-
-### Phase 3 — value delivered work
-
-Create an independent record of:
-
-- IBCX contracts and audits;
-- deployed website/front end;
-- integrations and maintenance performed;
-- treasury expenses already borne by contributors;
-- time period of active work;
-- product usage and revenue, without pretending failed traction means zero work;
-- work promised but not delivered, if documented.
-
-Use this to define a fair retained-compensation floor. The goal is restitution or re-alignment, not retroactive wage theft.
-
-Gate: the DAO can explain why the requested return amount is fair.
-
-### Phase 4 — make one time-bounded voluntary offer
-
-Recommended opening position:
-
-- acknowledge completed IBCX work;
-- ask the recipient to return a negotiated portion of the remaining allocation, with the unvested balance at agreement date as the reference ceiling;
-- request an immediate transfer from currently spendable ION;
-- for future vesting, request a public bank `SendAuthorization` or scheduled voluntary transfers to the new ION DAO core;
-- allow a defined retained allocation for delivered work;
-- give 30 days to respond and one optional 14-day extension;
-- publish the final signed terms and transaction receipts;
-- prohibit harassment, doxxing, or key requests.
-
-Do not ask for a mnemonic or private key. Do not accept shared custody of the vesting address.
-
-### Phase 5 — implement only a consented mechanism
-
-If the recipient agrees:
-
-1. the new ION DAO approves the settlement terms;
-2. the recipient returns the agreed currently spendable amount directly to the DAO;
-3. the recipient grants a bounded `cosmos.bank.v1beta1.SendAuthorization` to an approved DAO-controlled executor, or commits to dated transfers;
-4. the authorization is limited to `uion`, a maximum amount, an expiration after the vest end, and the settlement recipient;
-5. test authz execution with dust before relying on it;
-6. publish a vesting/return schedule and public monitor;
-7. execute periodic sweeps only as ION becomes spendable;
-8. reconcile every transfer against the agreed total;
-9. disclose that authz is revocable unless a different enforceable arrangement exists.
-
-A grant does not override vesting. An attempted send succeeds only to the extent the account has spendable ION.
-
-### Phase 6 — if there is no agreement
-
-- publish that no voluntary agreement was reached;
-- stop the negotiation on the stated date;
-- do not escalate rhetoric;
-- monitor public address activity;
-- apply the governance-risk mitigations in [`OPTIONS.md`](OPTIONS.md);
-- revisit only if new evidence or a new offer appears.
-
-No-action is a valid policy. Bad original terms do not become reversible merely because the incentive theory failed.
-
-### Phase 7 — extraordinary escalation gate
-
-Consider Osmosis governance only if all are true:
-
-- independently verified evidence establishes fraud, mistake, theft, enforceable breach, or chain-level defect;
-- the specific remedy and amount are narrowly tied to that evidence;
-- affected parties receive notice and a response opportunity;
-- legal and technical reviews are public;
-- the implementation is an audited state transition with reproducible pre/post invariants;
-- the proposal explains precedent and limits;
-- validators can verify the exact account and balance changes;
-- ordinary/voluntary remedies are unavailable or exhausted.
-
-Abandonment and concentration by themselves do not satisfy this gate.
-
-## Recommended governance posture
-
-Adopt this resolution separately from the DAO DAO modernization proposal:
-
-1. recognize proposal `12` as a valid historical governance action unless contrary evidence is produced;
-2. acknowledge that its vesting design omitted clawback and performance conditions;
-3. authorize a neutral voluntary-return outreach process, not confiscation;
-4. require any settlement to return funds only to a verified ION DAO-controlled address;
-5. require a separate governance approval for final terms;
-6. reject harassment and unverified attribution;
-7. direct future grants to use milestone escrow, revocable vesting where appropriate, scoped subDAOs, objective deliverables, and explicit termination language.
-
-## Future grant design lesson
-
-The failure was not “vesting.” The failure was time-only vesting with no revocation, milestones, or accountability path.
-
-Future contributor allocations should use:
-
-- milestone tranches;
-- clear acceptance criteria;
-- a DAO-controlled escrow or revocable vesting contract;
-- objective stop conditions;
-- a defined dispute process;
-- IP/source-code delivery requirements;
-- public progress receipts;
-- capped operating grants before large long-term allocations;
-- no expectation that token ownership automatically creates alignment.
-
-Tokens are not a sacrament. If alignment matters, encode the conditions.
-
-## Separation from modernization
-
-Do not bundle a clawback or settlement demand into the DAO DAO cutover.
-
-The modernization is infrastructure and custody hardening. The allocation issue is a contested historical policy and ownership question. Combining them increases governance fatigue, confuses voters, and creates an easy excuse to reject both.
-
-Use separate documents, separate discussion, and—only if needed—separate ION DAO proposals.
+This is a technical conclusion, not a legal one. The reviewed proposal text contains no express on-chain revocation or return mechanism. The chain does not determine whether an off-chain agreement created repayment, employment, fiduciary, fraud, IP, inducement, or other rights or remedies.
 
 ## Companion documents
 
-- [`EVIDENCE.md`](EVIDENCE.md) — proposal, vesting, balance, staking, and concentration receipts
-- [`OPTIONS.md`](OPTIONS.md) — technical/governance/legal option matrix and safeguards
-- [`REPRODUCE.md`](REPRODUCE.md) — infrastructure-neutral read-only query recipe
-- companion PR: ION DAO DAO modernization roadmap
+- [`EVIDENCE.md`](EVIDENCE.md) — height-pinned proposal/account/balance evidence
+- [`OPTIONS.md`](OPTIONS.md) — response matrix and technical/legal boundaries
+- [`REPRODUCE.md`](REPRODUCE.md) — archive-height query and decoding procedure
+- companion modernization roadmap: [PR #7](https://github.com/n0sn0de/ion-dao-contracts/pull/7)
+
+## Height-pinned account state
+
+Snapshot:
+
+- height: `66276784`
+- time: `2026-07-14T05:23:51.419944203Z`
+- account: `osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk`
+- type: `/cosmos.vesting.v1beta1.ContinuousVestingAccount`
+- account number: `906739`
+- sequence: `135`
+
+ION state at that exact height:
+
+| Item | Amount |
+|---|---:|
+| Original vesting field | 3,407.040000 ION |
+| Schedule vested | 1,967.405060 ION |
+| Schedule locked/unvested | 1,439.634940 ION |
+| Bank balance | 3,101.840914 ION |
+| Spendable bank balance | 1,662.205974 ION |
+| Active legacy stake | 151.700000 ION |
+| Legacy stake claims | none |
+| Bank plus active stake | 3,253.540914 ION |
+| Arithmetic difference from original vesting amount | 153.499086 ION |
+
+The final line is arithmetic only. Fungible balances may include later inflows or other holdings. It is not a finding that particular grant units were sold, spent, returned, or moved to a known destination.
+
+Bank plus active stake represented approximately `15.279851%` of the retained ION supply. This is current concentration, not proof of common control with any other address or proof of misconduct.
+
+## Proposal chronology
+
+| Proposal | Source field | Denom | End time | Current status | Technical reading |
+|---|---|---|---|---|---|
+| 10 | `osmo14hj2...2r9g9` | `uion` | 2028-07-27T00:00:00Z | passed, unexecuted | Required signer/source is not the executing DAO contract |
+| 11 | ION DAO | `ion` | 2028-08-12T13:00:00Z | passed, unexecuted | Encoded `ion`; proposal 12 identifies correction to `uion` |
+| 12 | ION DAO | `uion` | 2028-08-24T15:00:00Z | executed | Corrected message created the account |
+
+Proposal 12 execution transaction:
+
+`1E15143F3135DEAB9D902F03F5D54D4B53EB65D8593E77CDDA773AC57CEFE245`
+
+- height: `11126209`
+- time/account schedule start: `2023-08-23T15:54:38Z`
+
+Do not attribute proposals 10 or 11 to a nonempty target-account failure without a transaction receipt establishing that cause.
+
+## What the proposal text and public record support
+
+The proposal record represented that contributors had performed ION DAO/IBCX work and requested funding/compensation. Public evidence also includes:
+
+- later IBCX migration activity;
+- Osmosis proposal 504’s IBCX upload-permission record;
+- public IBCX source repositories;
+- archived evidence that the product site existed.
+
+This supports a finding that development activity occurred. It does not independently establish the complete scope, authorship, audit coverage, maintenance obligations, expense basis, IP ownership, or fair valuation of every claimed deliverable.
+
+Before using “work delivered” as a settlement valuation fact, independently verify:
+
+- source authorship and commit history;
+- deployed code and audits;
+- expenses;
+- maintenance/support periods;
+- domains and UI assets;
+- IP ownership/licensing;
+- any signed service, employment, grant, or side agreement.
+
+The proposal encoded no objective payment milestones, DAO revoker, termination trigger, or express return obligation. It did contain forward-looking roadmap, use-of-funds, dedication, and value-accrual statements whose off-chain significance requires separate review.
+
+## Separation from the proposal-deposit accounting incident
+
+The address associated with anomalous deposit records in proposals `22`–`39` is:
+
+`osmo1fuzlaeajk7t80ujags2c3jlfemauv2cayvm82e`
+
+The vesting address is different.
+
+This proves only that the on-chain addresses differ. It proves neither different nor common real-world identity/control. No reviewed evidence established a common-control link.
+
+Use neutral terms:
+
+- “address associated with affected proposals 22–39”;
+- “proposal-deposit accounting incident”;
+- “anomalous deposit records”;
+- “v0.0.1 accounting flaw.”
+
+Do not call the vesting allocation evidence of that incident.
+
+## Governance concentration scenario
+
+At the pinned height:
+
+```text
+current active stake      1,671.832757 ION
+newly staked spendable    1,662.205974 ION
+resulting active stake    3,334.038731 ION
+
+recipient current stake     151.700000 ION
+newly staked spendable    1,662.205974 ION
+potential voting power    1,813.905974 ION
+
+potential share ≈ 54.405666%
+```
+
+Assumptions:
+
+- all spendable bank ION is staked;
+- no other holder changes stake;
+- no intervening transfers or vesting changes;
+- standard one-token/one-vote staking.
+
+This demonstrates governance concentration risk. It is not a prediction, attribution of intent, or claim that specific vesting units would be used.
+
+## Normal clawback is unavailable
+
+Osmosis supports a separate `ClawbackVestingAccount` class with a recorded funder. The subject account is not that type.
+
+A normal `MsgClawback` path requires:
+
+1. the target account to be a clawback account; and
+2. the signer to match the recorded funder.
+
+The subject `ContinuousVestingAccount` has no such fields. ION DAO cannot:
+
+- sign as the account;
+- debit its bank balance;
+- convert it to a clawback account;
+- replace its key;
+- blacklist native `uion` through a denom admin;
+- invoke ordinary clawback successfully.
+
+Osmosis proposal `772`, “Demand return of IonDAO funding,” passed with an empty messages array. It was a political expression, not an executable transfer or new clawback authority.
+
+## Recommended process
+
+### 1. Preserve evidence
+
+Retain at one archive height:
+
+- proposals 10–12 and exact decoded payloads;
+- proposal 12 execution transaction;
+- auth account;
+- bank and spendable balances;
+- legacy stake/claims;
+- supply;
+- vesting/clawback SDK source;
+- relevant public work/deployment/audit records.
+
+### 2. Search for off-chain rights
+
+Use a counsel-controlled confidential process to locate:
+
+- signed service/employment/grant agreements;
+- IP assignments or licenses;
+- expense records;
+- milestone/termination/return terms;
+- settlement or side-letter records;
+- relevant jurisdiction and parties.
+
+Do not demand public disclosure of privileged, confidential, or personal material.
+
+### 3. Independently verify work and obligations
+
+Separate:
+
+- what the proposal represented;
+- what public chain/source evidence verifies;
+- what remains unsupported;
+- what qualified counsel or a competent forum concludes.
+
+### 4. Define a negotiation mandate
+
+A separate ION DAO proposal should define:
+
+- negotiators and conflicts;
+- requested-return formula or range;
+- evidence they may rely on;
+- approved destination;
+- confidentiality authority;
+- time limit;
+- reporting format;
+- no custody of keys or mnemonic material;
+- no authority to threaten, dox, blacklist, or promise chain intervention.
+
+### 5. Seek voluntary resolution
+
+Possible consensual components:
+
+- direct transfer of a negotiated spendable amount;
+- dated future transfers as more ION vests;
+- limited receiver-allowlisted Authz, only after exact deployed-path testing;
+- IP/domain/source handover if relevant;
+- governance abstention covenant;
+- mutual release or other consideration reviewed by counsel.
+
+Publish only governance-approved, redacted, non-privileged terms and on-chain receipts consistent with consent and legal obligations.
+
+### 6. If no agreement
+
+Close the process neutrally. Do not imply guilt, breach, or refusal of a valid debt unless supported by a competent finding.
+
+Use prospective controls:
+
+- public concentration monitoring;
+- long-enough voting and execution notice;
+- distributed participation targets;
+- segregated/filtered treasury mandates after separate review;
+- conflict disclosures;
+- incident response and address-change alerts.
+
+## Extraordinary chain intervention
+
+A bespoke Osmosis software upgrade could technically rewrite auth/bank state. A governance vote alone does not perform that state change: it would require a specific binary, audited upgrade handler, validator adoption, and exact state invariants.
+
+Consider even investigating that path only if:
+
+- credible authenticated evidence is reviewed by qualified counsel or a competent forum;
+- the issue is a specifically defined unauthorized transfer, material transactional error, or adjudicated/enforceable obligation—not political regret;
+- affected parties receive notice, evidence access, and a meaningful response opportunity;
+- conflicts and independent decision-makers are disclosed;
+- proportionality and least-intrusive remedies are analyzed;
+- only redacted, non-privileged summaries are published;
+- unrelated denoms, account key, account number, sequence, and state are preserved;
+- amounts and vesting fields are computed at a pinned execution block;
+- bank, supply, delegation, and vesting invariants are independently audited.
+
+Absent that evidentiary threshold, a retroactive state intervention creates serious credible-neutrality, precedent, validator-adoption, fork, exchange, and legal risks.
+
+## Explicit boundaries
+
+This package does not establish:
+
+- the legal owner or beneficiary of the account;
+- breach, fraud, theft, abandonment, or unjust enrichment;
+- the complete scope/value of delivered work;
+- current controller identity;
+- common control with affected proposal addresses;
+- a right to seize, freeze, blacklist, dilute, fork, or exclude the account;
+- that Authz will work through DAO DAO without a dedicated proof.
+
+It establishes account type, proposal execution, vesting schedule, pinned balances, on-chain authority limits, and a measured process for resolving uncertainty.

@@ -3,182 +3,232 @@
 ## Snapshot boundary
 
 - chain: `osmosis-1`
-- reference height: `66276784`
-- reference time: `2026-07-14T05:23:51.419944203Z`
-- ION total supply near snapshot: `21,293.014966 ION`
+- archive height: `66276784`
+- block time: `2026-07-14T05:23:51.419944203Z`
+- vesting account: `osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk`
+- ION DAO: `osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm`
+- legacy stake: `osmo1yg8930mj8pk288lmkjex0qz85mj8wgtns5uzwyn2hs25pwdnw42sf745wc`
 
-Values that depend on vesting time must be recomputed when cited later.
+Every snapshot claim below was re-queried against an archive endpoint at exactly this height. Time-dependent spendable/locked values must not be mixed with another height.
 
-## Proposal chronology
+## Proposal chronology and payload decoding
 
 ### Proposal 10
 
+- ID: 10
 - title: `[Treasury Spend] Allocate ION incentives to the ION DAO dev contributors`
-- submitted: `2023-07-19T13:02:02.339375976Z`
-- current status: `passed`
-- deposit: `0.5 ION`, not claimable because the proposal was never successfully executed
-- intended recipient: `osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk`
-- intended amount: `3,407.04 ION`
-- intended end time: `2028-08-24T15:00:00Z`
-- message type: `/cosmos.vesting.v1beta1.MsgCreateVestingAccount`
-- vesting style: continuous (`delayed=false`)
+- current status: `passed`, not executed
+- payload: `/cosmos.vesting.v1beta1.MsgCreateVestingAccount`
+- `from_address`: `osmo14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sq2r9g9`
+- recipient: vesting account above
+- amount: `3,407,040,000 uion`
+- end: Unix `1848268800` / `2028-07-27T00:00:00Z`
 
-The body described:
-
-- the ION DAO development contributors as working for more than one year;
-- an allocation of approximately 16% of ION supply;
-- five-year linear vesting;
-- a compensation rationale of about `$100,000` per year at the contemporary ION price;
-- work on ION DAO and IBCX.
-
-The body did not define milestone, revocation, service, termination, or repayment conditions.
+Technical reading: the required signer/source is not the executing ION DAO contract. The payload could not be validly dispatched under the DAO’s signer context.
 
 ### Proposal 11
 
+- ID: 11
 - title: `Execution of the Dev Funding`
-- submitted: `2023-08-04T13:00:37.875470040Z`
-- current status: `passed`
-- deposit: `0.5 ION`, not claimable because execution did not complete
-- intended recipient and amount: same as proposal 10
-- intended end time in the encoded message: `2028-08-24T23:00:00Z`
-- message type: `/cosmos.vesting.v1beta1.MsgCreateVestingAccount`
+- current status: `passed`, not executed
+- `from_address`: ION DAO
+- recipient: same account
+- amount: `3,407,040,000 ion`
+- end: Unix `1849698000` / `2028-08-12T13:00:00Z`
 
-The body says the earlier execution failed because the target account was not empty, which prevented the vesting-account creation path.
+Technical reading: the denom is `ion`, not native `uion`. Proposal 12 identifies the correction. Do not attribute the failure to an already-existing target account without a transaction receipt proving that separately.
 
 ### Proposal 12
 
+- ID: 12
 - title: `[Revised Proposal] dev funding`
-- submitted: `2023-08-16T15:54:00.934735016Z`
 - current status: `executed`
-- deposit: `0.5 ION`, claimed
-- source: ION DAO governance contract
-- destination: `osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk`
+- `from_address`: ION DAO
+- recipient: same account
 - amount: `3,407,040,000 uion`
-- end time: `2028-08-24T15:00:00Z`
-- delayed flag: `false`
-- message type: `/cosmos.vesting.v1beta1.MsgCreateVestingAccount`
+- end: Unix `1850742000` / `2028-08-24T15:00:00Z`
+- `delayed`: false
 
-The current auth account independently proves that this message succeeded.
+Execution transaction:
 
-## Decoded executed message
+- hash: `1E15143F3135DEAB9D902F03F5D54D4B53EB65D8593E77CDDA773AC57CEFE245`
+- height: `11126209`
+- time: `2023-08-23T15:54:38Z`
+- outer executor: `osmo1razrwml37rlgemxtp60yg3yku84t5f4g2tn5fl`
+- explorer receipt: [Mintscan transaction](https://www.mintscan.io/osmosis/tx/1E15143F3135DEAB9D902F03F5D54D4B53EB65D8593E77CDDA773AC57CEFE245?height=11126209)
 
-Human-readable protobuf fields:
+The outer executor triggered an already-approved proposal; it was not the source or recipient of the vesting transfer.
 
-```text
-from_address: osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm
-recipient:    osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk
-amount:       3407040000 uion
-end_time:     1850742000 (2028-08-24T15:00:00Z)
-delayed:      false
-```
+## Account schema
 
-The source address encoded in the executed proposal is the live ION DAO governance contract. Production reviewers should independently decode the protobuf bytes rather than trust this table.
-
-## Current auth account
-
-Account query returned:
+Archive account query returned:
 
 ```text
-@type: /cosmos.vesting.v1beta1.ContinuousVestingAccount
-original_vesting: 3407040000 uion
-start_time: 1692806078
-end_time: 1850742000
-account_number: 913967
-sequence: 24
+@type:          /cosmos.vesting.v1beta1.ContinuousVestingAccount
+account_number: 906739
+sequence:       135
+start_time:     1692806078
+end_time:       1850742000
+original uion:  3407040000
 ```
 
-Converted times:
+This is not:
 
-- start: `2023-08-23T15:54:38Z`
-- end: `2028-08-24T15:00:00Z`
+- a module account;
+- a `ClawbackVestingAccount`;
+- a contract escrow;
+- an account with a funder/revoker/admin field.
 
-The account JSON contains no funder, revoker, clawback address, DAO admin, or module owner.
+The account has unrelated non-ION bank holdings. This assessment does not characterize or propose action against those assets.
 
-## Current balances and vesting state
+## Height-pinned ION arithmetic
 
-At the reference time:
-
-| Quantity | Atomic uion | ION |
-| --- | ---: | ---: |
-| Original allocation | 3,407,040,000 | 3,407.040000 |
-| Current bank balance | 3,101,840,914 | 3,101.840914 |
-| Current spendable bank balance | 1,662,138,668 | 1,662.138668 |
-| Current locked bank balance | 1,439,702,246 | 1,439.702246 |
-| Active legacy stake | 151,700,000 | 151.700000 |
-| Outstanding legacy stake claims | 0 | 0 |
-| Known bank plus staked holdings | 3,253,540,914 | 3,253.540914 |
-| Original allocation not in those locations | 153,499,086 | 153.499086 |
-
-The “not in those locations” line is not proof of sale or recipient. It may reflect transfers or other positions not included in this bounded inventory. A broader forensics exercise would be needed before characterizing destination or use.
-
-## Supply and voting concentration
-
-Using total supply `21,293.014966 ION`:
-
-- original allocation: approximately `16.0007%` of current supply;
-- known bank plus staked holdings: approximately `15.2799%` of current supply;
-- current active stake: approximately `9.0739%` of legacy active voting power.
-
-If the address staked its entire currently spendable bank balance while every other current stake stayed constant:
+At `H=66276784`:
 
 ```text
-current total active stake     1,671.832757 ION
-+ newly staked spendable ION   1,662.138668 ION
-= resulting active stake       3,333.971425 ION
-
-recipient current stake          151.700000 ION
-+ newly staked spendable ION   1,662.138668 ION
-= potential voting power       1,813.838668 ION
-
-potential share ≈ 54.4047%
+original vesting     3,407,040,000 uion
+schedule vested      1,967,405,060 uion
+schedule locked      1,439,634,940 uion
+bank balance         3,101,840,914 uion
+spendable bank       1,662,205,974 uion
+legacy active stake    151,700,000 uion
+legacy claims                    0 uion
 ```
 
-This is a scenario, not a prediction. It demonstrates that quorum or a 3% active threshold does not eliminate concentration risk.
+Reconciliation:
 
-## Account-type implications
+```text
+bank balance - locked
+= 3,101,840,914 - 1,439,634,940
+= 1,662,205,974 spendable uion
+```
 
-`ContinuousVestingAccount` enforces a time-dependent spendable balance. It does not:
+Current bank plus active stake:
 
-- lock the account's key away from the recipient;
-- keep the original sender as owner;
-- create a revocable escrow;
-- track milestones;
-- allow a CosmWasm DAO to override bank spendability;
-- grant Osmosis governance an ordinary clawback message.
+```text
+3,101.840914 + 151.700000
+= 3,253.540914 ION
+```
 
-Once ION vests, the recipient can transfer or stake it. Unvested ION remains unavailable for ordinary sends until time unlocks it.
+Arithmetic difference from original vesting:
 
-## Separation from the deposit exploit
+```text
+3,407.040000 - 3,253.540914
+= 153.499086 ION
+```
 
-The quarantined deposit entries in ION proposals `22`-`39` are associated with:
+The difference is not a provenance or disposition finding. Fungible current balances may contain later inflows or other ION. No claim is made that particular grant units were sold, spent, returned, or moved to a known destination.
 
-`osmo1fuzlaeajk7t80ujags2c3jlfemauwqg3s6t7dk`
+## Supply and concentration
 
-The developer vesting recipient is:
+ION supply at the same height:
+
+```text
+21,293.014966 ION
+```
+
+Bank plus active stake as a share of supply:
+
+```text
+3,253.540914 / 21,293.014966
+≈ 15.279851%
+```
+
+Potential staking scenario:
+
+```text
+current active stake      1,671.832757 ION
+spendable bank amount     1,662.205974 ION
+resulting active stake    3,334.038731 ION
+
+current account stake       151.700000 ION
+plus spendable amount     1,662.205974 ION
+potential voting power    1,813.905974 ION
+potential share             54.405666%
+```
+
+This is a mechanical scenario under fixed assumptions, not a forecast or statement of intent.
+
+## Proposal-text and work evidence
+
+The on-chain proposal narrative represented that contributors had performed work and requested funding/compensation. It contained forward-looking roadmap, use-of-funds, continued-dedication, and value-accrual statements.
+
+Public corroborating evidence includes:
+
+- Osmosis proposal 504’s IBCX upload-permission record;
+- public IBCX source repositories;
+- later IBCX migration activity;
+- archived product-site availability;
+- referenced audit activity.
+
+This supports that development activity occurred. It does not independently establish the complete scope, authorship, expenses, IP status, maintenance obligations, or fair value. Those require source/deployment/audit records and any off-chain agreements.
+
+The reviewed proposal text encoded no objective payment milestones, DAO revoker, termination trigger, repurchase term, or express return obligation.
+
+No `$100,000 per year` claim is used because the retrieved on-chain descriptions do not contain that figure and this package does not supply a pinned external price calculation.
+
+## On-chain clawback boundary
+
+Osmosis supports a different vesting class with clawback fields. The subject account is not that class.
+
+For normal clawback, the chain expects:
+
+- `ClawbackVestingAccount` target type;
+- matching recorded funder signer.
+
+The subject account contains no funder/revoker field. The ION DAO cannot sign as the account or convert its type through an ordinary message.
+
+Osmosis proposal 772, “Demand return of IonDAO funding,” passed with no executable messages. It did not move funds or create clawback authority.
+
+## Authz state and limits
+
+No relevant Authz grant by the vesting account was identified at the reviewed height.
+
+A future voluntary `SendAuthorization` could specify:
+
+- `uion` spend limit;
+- receiver allowlist;
+- expiration.
+
+But it would not:
+
+- reserve bank balance;
+- prevent the grantor from revoking;
+- prevent other spending or staking first;
+- move existing legacy-staked ION or future claims;
+- schedule execution automatically;
+- identify “grant coins” separately from fungible `uion`;
+- let an external wallet sign as a DAO-core grantee.
+
+A DAO core used as grantee must itself emit the exact `MsgExec` through a successfully executed proposal. That deployed path has not been proven on Osmosis.
+
+## Separation from affected proposals 22–39
+
+Address associated with affected proposals and anomalous deposit records:
+
+`osmo1fuzlaeajk7t80ujags2c3jlfemauv2cayvm82e`
+
+Vesting account:
 
 `osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk`
 
-They are different addresses. This review found no chain evidence proving common control.
+The addresses differ. No reviewed evidence established common control. Different addresses also do not prove different real-world control.
 
-The exploit was a legacy proposal-deposit accounting flaw. The developer allocation was an executed governance spend. Treat them as separate unless stronger evidence says otherwise.
+## Governance-legitimacy uncertainty
 
-## Evidence quality and gaps
+Proposal 12 is recorded as executed and the account/transfer are independently verified. Current migrated proposal state reports vote/weight fields that do not obviously reconcile with the stored quorum under the published legacy code.
 
-Strong chain evidence:
+Before using proposal 12 as pristine evidence of governance legitimacy, replay the original code ID 3 behavior against historical state and retain the historical execution transaction/events. This uncertainty does not change the verified account type or transfer.
 
-- proposal status and encoded messages;
-- current account type and vesting fields;
-- current bank, spendable, locked, staking, claim, and supply queries;
-- distinct vesting and exploit addresses.
+## What the evidence does not determine
 
-Not established here:
+- legal owner or beneficiary;
+- current human/controller identity;
+- fraud, theft, breach, employment, fiduciary, or restitution rights;
+- complete delivered-work scope/value;
+- validity or effect of off-chain agreements;
+- common control with any affected-proposal address;
+- entitlement to confiscate, freeze, dilute, fork, or exclude;
+- future account behavior.
 
-- real-world identity/control;
-- full transaction graph for the `153.499086 ION` not in bounded holdings;
-- off-chain contributor contracts;
-- intellectual-property ownership;
-- legal enforceability;
-- present intent of the recipient;
-- social-channel statements or promises.
-
-Those gaps must remain gaps. Vibes are not evidence.
+Those questions require additional evidence and, where applicable, qualified legal review or a competent forum.

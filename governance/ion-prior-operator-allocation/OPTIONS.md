@@ -1,307 +1,260 @@
 # Response options and recommendations
 
+This document compares technical/governance paths. It is not legal advice and does not determine entitlement.
+
 ## Decision matrix
 
-| Option | ION DAO alone? | Recipient consent? | Osmosis governance? | Technical feasibility | Governance/legitimacy risk | Recommendation |
-| --- | --- | --- | --- | --- | --- | --- |
-| Voluntary immediate return of spendable ION | Yes, as recipient | Yes | No | High | Low | Pursue |
-| Voluntary periodic returns as ION vests | Yes | Yes | No | High | Low | Pursue |
-| Bounded bank authz to DAO-controlled executor | Yes after grant | Yes | No | Plausible; prototype first | Medium because grant is revocable and executor must be correct | Pursue as implementation option |
-| New escrow funded from spendable ION | Yes | Yes | No | High | Low/medium | Use if settlement requires schedule |
-| Recipient transfers account key | No safe design | Yes | No | Bad custody practice | Extreme | Reject; never request keys |
-| ION DAO contract pulls unvested funds | No | No | No | Impossible under current account type | N/A | Reject |
-| ION DAO blacklists the address in standard DAO DAO | No standard support | No | No | Requires custom voting code | High | Reject for launch |
-| Per-address voting cap/quadratic module | Custom contract | No | No | Possible with audit | High; changes token rights and UI assumptions | Defer unless separately mandated |
-| Security Council veto window | Yes | No | No | Supported by DAO DAO | Medium; bounded trusted role | Recommended if credible council exists |
-| Treasury subDAO with message filters/spend caps | Yes | No | No | Possible with reviewed modules | Medium complexity | Evaluate after modernization |
-| Court/contract enforcement | Off-chain | Not necessarily | No | Depends on agreement/jurisdiction | High cost; legal review required | Only if documented rights exist |
-| Osmosis software-upgrade clawback | No | No | Yes | Technically possible as bespoke state transition | Extreme precedent and chain risk | Last resort only under extraordinary evidence |
-| Social pressure/doxxing | No legitimate authority | No | No | Harmful | Extreme | Reject |
-| No action plus monitoring | Yes | No | No | High | Low | Valid baseline |
+| Option | ION DAO alone? | Recipient consent? | Osmosis state intervention? | Main limitation | Recommendation |
+|---|---:|---:|---:|---|---|
+| Publish pinned neutral evidence | Yes | No | No | Must protect confidential/legal material | Do now |
+| Time-boxed voluntary negotiation | Yes | Yes for transfer | No | No unilateral enforcement | Preferred substantive path |
+| Direct return of spendable ION | Yes to accept | Yes | No | Limited to balance spendable at execution | Preferred if agreed |
+| Dated future direct transfers | Yes to accept | Yes | No | Requires repeated recipient action | Simple fallback |
+| Authz-assisted future transfers | Yes after proof | Yes | No | Revocable, no reservation/scheduler, DAO-grantee path unproven | Conditional only |
+| Voluntary voting/transfer covenant | Yes to recognize | Yes | No | Mainly contractual/social enforcement | Supplemental |
+| Tender or negotiated buyback | Yes, subject to treasury approval | Yes | No | Valuation, conflicts, market impact | Possible settlement tool |
+| Leave allocation intact and monitor | Yes | No | No | Concentration remains | Lawful/default baseline absent stronger rights |
+| Prospective treasury segmentation | Yes after modernization | No | No | Does not alter account balance | Worth separate design review |
+| Custom voting cap/quadratic module | Requires custom contracts | No | No | Rights change, UI/audit/legitimacy risk | Do not rush into modernization |
+| Native `uion` blacklist/freeze | No ordinary path | No | Yes | Bespoke bank-state intervention | Not recommended absent extraordinary evidence/process |
+| Forced balance rewrite | No | No | Yes | Software upgrade, validator adoption, legal/precedent/fork risk | Last resort only |
+| Replacement-token exclusion/dilution | No simple path | No | Usually | Economically confiscatory and ecosystem-breaking | Not recommended |
 
-## Option 1 — voluntary immediate return
+## Option 1 — publish a neutral evidence record
 
-The recipient sends an agreed amount of currently spendable `uion` directly to the verified ION DAO core.
+Publish:
 
-Controls:
+- exact proposal 10–12 decoding;
+- proposal 12 execution transaction;
+- fixed-height account/balance/spendable/stake/supply data;
+- account-type and clawback-source analysis;
+- uncertainty and off-chain-rights boundaries;
+- an invitation to submit corrections through both public and confidential channels.
 
-- ION governance approves the settlement and receiver;
-- recipient verifies the receiver from chain queries, not chat text;
-- send a dust test first;
-- publish transaction hashes and updated arithmetic;
-- no intermediary wallet;
-- no claim over unvested funds beyond the signed agreement.
+Do not publish:
+
+- private contracts without authority;
+- privileged advice;
+- personal data unnecessary to governance;
+- unverified identity/control claims;
+- allegations not supported by evidence.
+
+This option improves future decision quality without changing balances.
+
+## Option 2 — voluntary negotiation
+
+A governance-approved mandate should define:
+
+- authorized negotiators and conflicts;
+- requested-return formula or range;
+- evidence scope;
+- approved destination;
+- confidentiality and counsel role;
+- expiration;
+- reporting format;
+- prohibition on key/mnemonic custody;
+- prohibition on threats, doxxing, unsupported accusations, or promised chain intervention.
+
+Possible negotiated terms:
+
+- immediate return from spendable balance;
+- future dated installments as more ION vests;
+- governance abstention or voting disclosure covenant;
+- IP/domain/source transfer if relevant;
+- verified expense/work recognition;
+- mutual release or other consideration.
+
+Work recognition must be evidence-based. Proposal text represented specified work; public records indicate development activity. Independently verify scope, authorship, deployments, audits, maintenance, expenses, and IP before assigning settlement value.
+
+If negotiations end without agreement, publish only a neutral process-closure statement consistent with confidentiality and legal obligations. Do not imply guilt, breach, or refusal of an established debt.
+
+## Option 3 — direct voluntary transfer
+
+The account can transfer only bank ION that is spendable at execution. Spendable balance changes continuously with vesting and may also change through other transactions.
+
+Safe procedure:
+
+1. agree amount and destination in atomic `uion`;
+2. pin a pre-transfer height for the public reference;
+3. re-query spendable balance immediately before signing;
+4. recipient signs a normal bank send;
+5. destination verifies receipt;
+6. publish only approved terms and the transaction receipt.
+
+No private key, mnemonic, or shared custody is required or acceptable.
+
+## Option 4 — dated future direct transfers
+
+The simplest future-return method is a schedule of direct sends as ION becomes spendable.
 
 Advantages:
 
-- simple;
-- final;
-- no custom code;
-- no Osmosis governance;
-- lowest custody risk.
+- standard bank messages;
+- no custom contract;
+- no DAO-as-Authz-grantee uncertainty.
 
-Limit: only currently spendable ION can move.
+Limitations:
 
-## Option 2 — periodic voluntary returns
+- repeated recipient action;
+- missed-payment/monitoring process;
+- no automatic reservation of future vested amounts;
+- off-chain enforcement depends on agreement and law.
 
-The recipient sends a fixed amount monthly or quarterly as vesting unlocks.
+This is preferable to a technically elaborate Authz flow if direct installments are acceptable.
 
-A schedule should specify:
+## Option 5 — Authz-assisted future transfers
 
-- total settlement amount;
-- retained compensation;
-- installment amount/date;
-- verified destination;
-- treatment of missed payments;
-- final reconciliation;
-- public reporting;
-- whether obligations are moral, contractual, or both.
+A consensual `SendAuthorization` may contain:
 
-Advantages:
+- `uion` spend limit;
+- receiver allowlist;
+- expiration.
 
-- works with native continuous vesting;
-- no custom account transformation;
-- easy to verify.
+A DAO-core grantee is not automatically workable. `MsgExec`’s signer is the grantee. An external operator cannot sign as a contract address; a successfully executed DAO proposal must emit the exact `MsgExec`.
 
-Risks:
+Before recommending this mechanism:
 
-- requires continuing cooperation;
-- recipient may stop;
-- long monitoring horizon.
+1. deploy a bounded test matching current Osmosis app behavior;
+2. use a continuous-vesting account, not only an ordinary account;
+3. prove the exact DAO core/proposal-module execution path;
+4. identify who triggers installments and pays gas;
+5. define retries, partial execution, reconciliation, and alerting;
+6. handle legacy-staked ION and future claims separately;
+7. prove receiver allowlist and spend-limit behavior;
+8. prove revocation and insufficient-balance failure behavior.
 
-## Option 3 — bank authz
+Even if proven, Authz:
 
-The recipient may grant a `cosmos.bank.v1beta1.SendAuthorization` to a reviewed grantee, potentially the new ION DAO core or a narrow executor.
+- does not reserve balance or establish priority;
+- can be revoked by the grantor;
+- does not prevent competing transfers/staking;
+- does not move the current 151.7 ION legacy stake;
+- does not schedule itself;
+- cannot distinguish historical grant units from other fungible `uion`.
 
-Recommended bounds:
+Prefer dated direct transfers if contract-grantee execution remains uncertain.
 
-- denom: `uion` only;
-- spend limit: settlement amount only;
-- allowlist: verified ION DAO receiver if supported by the deployed SDK message;
-- expiration: shortly after `2028-08-24T15:00:00Z`;
-- no generic authorization for other message types;
-- public grant and revoke monitoring.
+## Option 6 — tender or negotiated buyback
 
-Important limitations:
+ION DAO could offer consideration for voluntary transfer.
 
-- authz does not make unvested ION spendable;
-- execution succeeds only for currently spendable amounts;
-- the grantor can normally revoke the authorization;
-- DAO DAO must be proven able to emit the exact `MsgExec` as grantee;
-- a contract grantee and signer context must be tested on the current Osmosis app version;
-- a failed or over-large send must not block future installments permanently;
-- the executor must not receive discretionary custody.
+Required controls:
 
-Validation plan:
+- independent valuation method;
+- conflict disclosures;
+- treasury affordability;
+- market-impact analysis;
+- exact authority and spending cap;
+- no self-dealing;
+- treatment of locked vs spendable amounts;
+- public receipts and redacted terms.
 
-1. reproduce current Osmosis authz protobuf and message-server behavior;
-2. create a dust grant from a test account;
-3. execute through a disposable DAO DAO core or narrow test contract;
-4. prove receiver, spend-limit decrement, expiration, and revocation;
-5. test an amount above spendable balance and require safe failure;
-6. audit any helper contract;
-7. only then encode the settlement mechanism.
+A buyback may be economically cleaner than coercion, but it uses current-holder treasury assets and needs clear approval.
 
-Do not describe authz as irrevocable escrow.
+## Option 7 — voluntary governance covenant
 
-## Option 4 — voluntary escrow
+A recipient could agree to:
 
-The recipient transfers currently spendable ION to an audited vesting/escrow contract whose beneficiary is the ION DAO or a defined split.
+- abstain from specified treasury/admin proposals;
+- disclose staking/voting intentions;
+- return ION as vested;
+- avoid governance action during a defined transition.
 
-Use only if settlement terms need staged release or mutual conditions. A direct return is safer when no staging is needed.
+This can reduce risk but does not change on-chain voting rights unless accompanied by enforceable custody or contract terms. Do not present a social pledge as cryptographic enforcement.
 
-Requirements:
+## Option 8 — leave the allocation intact and mitigate prospectively
 
-- verified source and reproducible Wasm;
-- self-admin or no-admin policy approved by ION governance;
-- explicit beneficiaries and schedule;
-- no deployer withdrawal path;
-- no arbitrary migration admin;
-- emergency/recovery behavior documented;
-- test amounts before meaningful value.
+Absent consent or stronger verified rights, leaving the account unchanged is the technical/legal baseline.
 
-This cannot move currently unvested ION out of the original account.
+Prospective controls may include:
 
-## Option 5 — governance safeguards without clawback
+- public alerts for bank/stake movements;
+- five-day revoting and adequate execution notice;
+- active-participation margin before treasury handoff;
+- distributed voter participation;
+- conflict disclosures;
+- narrowly scoped treasury subDAO/filter design after separate review;
+- independent payload/admin verification;
+- emergency incident response.
 
-### Public monitoring
+These measures reduce operational risk without rewriting an account balance.
 
-Monitor only public chain behavior:
+## Option 9 — custom voting cap, quadratic voting, or alternate token
 
-- bank sends from/to the vesting address;
-- new ION stakes, unstakes, and claims;
-- proposal votes and voting power;
-- authz grants/revocations;
-- vesting unlock milestones;
-- concentration as share of active voting power.
+These designs may reduce address concentration but create new problems:
 
-Alerts should report facts, not label normal transfers as malicious.
+- targeted disenfranchisement concerns;
+- sybil splitting;
+- custom contract audit burden;
+- daodao.zone compatibility uncertainty;
+- token-rights and legitimacy disputes;
+- migration effects on liquidity, IBC, and integrations.
 
-### Voting configuration
+Do not add a custom voting module to the urgent DAO DAO modernization unless separately specified, audited, tested, and broadly approved.
 
-Recommended modernization settings:
+## Option 10 — native blacklist, freeze, fork, or replacement-token exclusion
 
-- 30% quorum;
-- strict majority;
-- five-day voting;
-- revoting enabled;
-- seven-day unstaking;
-- 3% active threshold;
-- members-only proposals;
-- 1 ION `OnlyPassed` deposit.
+Native `uion` has no tokenfactory admin blacklist. Implementing a freeze or forced transfer requires bespoke chain logic.
 
-These improve notice and spam resistance. They do not prevent majority control if the address stakes enough.
+Replacement-token exclusion is economically similar to confiscation and disrupts:
 
-### Veto-only Security Council
+- pools;
+- contracts;
+- IBC representations;
+- fungibility;
+- integrations;
+- holders beyond the target account.
 
-If the community appoints a credible five-member council:
+This is not a normal ION DAO remedy.
 
-- three-of-five member DAO;
-- no treasury;
-- no main-core admin;
-- 48-hour timelock;
-- `early_execute=false`;
-- veto only malicious, exploit-driven, or payload-mismatched proposals;
-- public rationale;
-- replaceable by ION DAO governance.
+## Option 11 — extraordinary Osmosis software intervention
 
-This can stop obvious treasury theft after a whale-controlled vote. It must not become a political override for ordinary policy.
+A software-upgrade proposal could authorize a bespoke binary/handler that rewrites state. The governance vote itself does not execute the rewrite.
 
-### Treasury compartmentalization
+Minimum process before even drafting code:
 
-After modernization, consider moving operating budgets to subDAOs with:
+- credible authenticated evidence reviewed by qualified counsel or a competent forum;
+- specifically defined unauthorized transfer, material transactional error, or adjudicated/enforceable obligation;
+- standing/authority analysis for ION DAO and Osmosis governance;
+- notice, evidence access, and meaningful response opportunity;
+- independent decision-makers and conflicts;
+- least-intrusive-remedy and proportionality analysis;
+- public redacted, non-privileged summary;
+- exact pinned-block amount and vesting calculation;
+- preservation of unrelated denoms, account key, number, sequence, and state;
+- preservation of bank/supply/delegation/vesting invariants;
+- audited upgrade code and handler;
+- validator coordination and adoption plan;
+- fork/exchange/custodian/IBC impact analysis;
+- rollback and post-upgrade verification.
 
-- fixed funding caps;
-- allowed receiver/message filters;
-- timelocks;
-- periodic renewal;
-- public accounting;
-- main-DAO recall or replacement path subject to the same timelock.
+Mere disappointment with product performance or token concentration does not satisfy this threshold.
 
-Do not move the entire treasury behind an unaudited filter or signer service.
+## Security Council note
 
-## Option 6 — custom voting restrictions
+A standard DAO DAO vetoer is not technically bounded merely because a charter says “security only.” A council core may execute arbitrary messages, and an incumbent vetoer may obstruct its own replacement.
 
-Possible designs include:
-
-- per-address voting cap;
-- square-root/quadratic voting;
-- conviction/time-weighted voting;
-- delegation caps;
-- excluding a named address;
-- dual-house voting.
-
-Problems:
-
-- standard DAO DAO token-staked module does not provide them;
-- address caps are Sybil-fragile unless identity exists;
-- excluding one address is political disenfranchisement and can be bypassed by transfers where spendable;
-- quadratic voting without Sybil resistance is mostly cosplay;
-- custom modules require audit, source verification, migration planning, and UI testing;
-- daodao.zone may not expose stake/config actions correctly.
-
-Recommendation: do not block modernization on custom voting. Research separately only if the community wants constitutional change, not revenge against one holder.
-
-## Option 7 — legal enforcement
-
-This repository cannot determine legal rights.
-
-A qualified reviewer should examine whether an enforceable agreement created:
-
-- milestones;
-- continuing service;
-- representations that induced the grant;
-- return obligations;
-- IP delivery conditions;
-- fraud or mistake claims;
-- jurisdiction and remedy.
-
-If valid rights exist, a legal settlement or order may produce voluntary transfer or other relief without a chain-sovereign state rewrite.
-
-Do not publicly assert breach before reviewing the actual agreement and giving the other party a response opportunity.
-
-## Option 8 — Osmosis governance intervention
-
-### What it would actually require
-
-The target is a normal `ContinuousVestingAccount`. There is no ordinary ION or Osmosis governance message that revokes it.
-
-A forced change would likely require:
-
-1. a new Osmosis software release;
-2. an upgrade handler or tightly scoped state-migration code;
-3. exact pre-upgrade account/balance assertions;
-4. conversion, freeze, or bank-balance/account-state rewrite;
-5. exact destination and vesting treatment;
-6. validator adoption of the release;
-7. post-upgrade invariants and rollback/failure handling.
-
-That is chain-sovereign intervention in an account, not a smart-contract migration.
-
-### Risks
-
-- undermines credible neutrality and property expectations;
-- creates precedent for governance confiscation after political disappointment;
-- can corrupt vesting/bank supply invariants if implemented badly;
-- exposes validators and contributors to legal and reputational risk;
-- may split validator/community support;
-- can be mistaken for rescuing price rather than remedying theft;
-- consumes substantial governance attention.
-
-### Minimum extraordinary-evidence standard
-
-Do not proceed unless there is:
-
-- verified fraud, theft, mistake, or enforceable breach;
-- a precise amount and remedy;
-- notice and response opportunity;
-- independent legal review;
-- independent technical audit;
-- public upgrade source and reproducible build;
-- narrow one-time invariants;
-- broad chain-level legitimacy beyond the interested ION DAO.
-
-“Whale is no longer aligned” is not enough. If that became sufficient, no token grant would be final and governance would be a seizure committee.
+PR #7 therefore does not recommend a launch Security Council. Any later proposal requires an exact module graph, four-field veto configuration, timing, sunset, replacement path, conflict rules, operational drills, and independent review.
 
 ## Recommended sequence
 
-1. approve the neutral evidence package off-chain;
-2. search for contributor agreements and missing terms;
-3. independently value delivered work;
-4. publish a voluntary settlement invitation;
-5. negotiate for 30 days, with one possible 14-day extension;
-6. if accepted, use direct return plus tested authz/periodic transfers;
-7. approve final terms through the modernized ION DAO;
-8. if declined, publish closure and apply governance safeguards;
-9. do not escalate to Osmosis governance without extraordinary new evidence.
+1. Merge only after the pinned evidence and legal-boundary wording are accepted.
+2. Preserve raw archive receipts and source commits.
+3. Open a confidential channel for agreements/evidence.
+4. Independently verify work, expenses, IP, and obligations.
+5. Approve a time-boxed negotiation mandate.
+6. Prefer direct voluntary transfer or dated installments.
+7. Use Authz only after exact deployed-path proof.
+8. If no agreement, close neutrally and apply prospective safeguards.
+9. Consider extraordinary state intervention only after the evidentiary/process threshold above.
 
-## Proposal design if a voluntary settlement is reached
+## Non-negotiable safeguards
 
-The ION DAO proposal should contain:
-
-- no accusation or threat;
-- exact retained and returned amounts;
-- current spendable and locked balances at a pinned height;
-- settlement schedule;
-- verified receiver;
-- authz/escrow code and message details if used;
-- revocation/default behavior;
-- recognition of delivered IBCX work;
-- release/dispute terms reviewed appropriately;
-- public monitoring and final completion criteria.
-
-It should not contain private identities, private communications without consent, keys, internal infrastructure, or claims that exceed evidence.
-
-## No-action baseline
-
-If no agreement or enforceable right exists, the clean answer may be to leave the vesting account alone.
-
-Then:
-
-- make the concentration visible;
-- harden governance against sudden execution;
-- compartmentalize treasury authority;
-- design future grants correctly;
-- stop spending community attention on an unwinnable confiscation campaign.
-
-Governance maturity includes knowing when not to swing the chain like a hammer.
+- never request or accept a mnemonic/private key;
+- no harassment, doxxing, or unsupported accusation;
+- no claim that account concentration proves misconduct;
+- no claim that proposal execution settles off-chain legal rights;
+- no public disclosure of confidential/privileged material without authority;
+- no effect on unrelated denoms or account state;
+- no chain-intervention promise without code, process, and validator adoption;
+- no bundled modernization/confiscation proposal.

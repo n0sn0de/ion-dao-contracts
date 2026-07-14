@@ -1,0 +1,84 @@
+{
+  "block_time": "2026-07-14T05:23:51.419944203Z",
+  "chain_id": "osmosis-1",
+  "files": [
+    {
+      "bytes": 23,
+      "path": "evidence/authz-grants-by-granter-66276784.json",
+      "sha256": "84843b01b2c1b18e1f3d234b54c834752e399ba72364a1538dba7764b878ce3f"
+    },
+    {
+      "bytes": 1113,
+      "path": "evidence/bank-balances-66276784.json",
+      "sha256": "1007f10a0eca5c064b086c5e94e8c806b17c282208b075725fa5fdfe37035238"
+    },
+    {
+      "bytes": 1010,
+      "path": "evidence/block-header-66276784.json",
+      "sha256": "6a37039f5f879bfd6a6f42e66992a1effba25cede7746a2751861bba7301ec43"
+    },
+    {
+      "bytes": 37,
+      "path": "evidence/legacy-claims-66276784.json",
+      "sha256": "675a06da851b222efc7721228345ce099478f6769503b6284d9c3d81e061c67f"
+    },
+    {
+      "bytes": 45,
+      "path": "evidence/legacy-staked-value-66276784.json",
+      "sha256": "0ac19e09262ac88eeb3710880da4a59a36d368109d6b8dd0f6eac4d640ee0f47"
+    },
+    {
+      "bytes": 70,
+      "path": "evidence/legacy-total-power-66276784.json",
+      "sha256": "7ce1fe7b1e4024d9a34b5b44d7236f2035ef689847f51f67db0366d498cadb52"
+    },
+    {
+      "bytes": 46,
+      "path": "evidence/legacy-total-value-66276784.json",
+      "sha256": "35549ba2b78c7d2675f20e23a1c12fd3a709da8e7e44286e54340ece0fd8a7fd"
+    },
+    {
+      "bytes": 10576,
+      "path": "evidence/proposal-10-66276784.json",
+      "sha256": "dbb58419e012ef9329e6e9ca4ba94bb9a43b82f087c377d4c4daf488d0798e5b"
+    },
+    {
+      "bytes": 3496,
+      "path": "evidence/proposal-11-66276784.json",
+      "sha256": "5957ea1c6c24097952526f22a4aeca418aad03016e312141fecac30ec0dd5bc2"
+    },
+    {
+      "bytes": 7071,
+      "path": "evidence/proposal-12-66276784.json",
+      "sha256": "24fe4e9de09701200e6580d798b68184a82edce7ca40bce52e1b2b7229a0751e"
+    },
+    {
+      "bytes": 629,
+      "path": "evidence/proposal-12-execution-reference.json",
+      "sha256": "c5c21d49bb7596b28b7552cd97b4d3cf965bb457e103ad028e79152f5f66dea7"
+    },
+    {
+      "bytes": 1113,
+      "path": "evidence/spendable-balances-66276784.json",
+      "sha256": "39af44157f2017255dca1665545ac5b644fd2c42f2e3c90d1f8763409e85ba6c"
+    },
+    {
+      "bytes": 71,
+      "path": "evidence/uion-supply-66276784.json",
+      "sha256": "7668b4bfe280c5113a1d23ea8e50a9c7ffe5513612329b30f3aed3f5f9553b46"
+    },
+    {
+      "bytes": 833,
+      "path": "evidence/vesting-account-66276784.json",
+      "sha256": "cebd3bf51f043279d416c3e7bf0f7f98284d63fcadf072e5fee41414ae8257ab"
+    },
+    {
+      "bytes": 2721,
+      "path": "SOURCE-PINS.md",
+      "sha256": "eaee88288e936d1e1774a4d1b670b5447d1f316152cf914de4c5071077e3aec4"
+    }
+  ],
+  "height": "66276784",
+  "schema": "ion-prior-operator-evidence-manifest/v1",
+  "source_note": "SOURCE-PINS.md"
+}

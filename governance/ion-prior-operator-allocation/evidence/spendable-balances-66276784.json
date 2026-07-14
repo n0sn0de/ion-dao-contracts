@@ -1,0 +1,47 @@
+{
+  "balances": [
+    {
+      "denom": "factory/osmo1pfyxruwvtwk00y8z06dh2lqjdj82ldvy74wzm3/WOSMO",
+      "amount": "1"
+    },
+    {
+      "denom": "gamm/pool/1142",
+      "amount": "1000000000000000000"
+    },
+    {
+      "denom": "gamm/pool/2",
+      "amount": "1299946088449194913581897"
+    },
+    {
+      "denom": "ibc/498A0751C798A0D9A389AA3691123DADA57DAA4FE165D5C75894505B876BA6E4",
+      "amount": "767399880"
+    },
+    {
+      "denom": "ibc/884EBC228DFCE8F1304D917A712AA9611427A6C1ECC3179B2E91D7468FB091A2",
+      "amount": "5580351525902"
+    },
+    {
+      "denom": "ibc/9BCB27203424535B6230D594553F1659C77EC173E36D9CF4759E7186EE747E84",
+      "amount": "5000000"
+    },
+    {
+      "denom": "ibc/B9E0A1A524E98BB407D3CED8720EFEFD186002F90C1B1B7964811DD0CCC12228",
+      "amount": "1000000"
+    },
+    {
+      "denom": "ibc/C360EF34A86D334F625E4CBB7DA3223AEA97174B61F35BB3758081A8160F7D9B",
+      "amount": "5000000"
+    },
+    {
+      "denom": "uion",
+      "amount": "1662205974"
+    },
+    {
+      "denom": "uosmo",
+      "amount": "1061931786"
+    }
+  ],
+  "pagination": {
+    "total": "10"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "data": {
+    "id": 11,
+    "title": "Execution of the Dev Funding",
+    "link": "https://commonwealth.im/ion/discussion/12475-execution-of-the-dev-funding",
+    "description": "## Context\nTo initiate the vesting of the dev funding at the chain level, one more governance has to be passed besides the passing of [Proposal #10](https://ion.wtf/proposal/ion/10). Please take a moment to read more details below.\n\nThe Stargate message to initiate the dev funding that was embedded in Proposal #10 failed to execute due to a minor conflict between the Osmosis testnet and mainnet environments. We’re uploading this proposal to correctly execute the dev funding plan as approved by the ION governance.\n\nDue to the change in the execution time, the end time of the vesting will be changed accordingly as below: \n- Previously proposed and passed via Proposal #10: Thursday, July 27, 2028 12:00:00 AM UTC (Time Stamp: 1848268800)\n- Updated time via Proposal #11: Saturday, August 12, 2028 13:00:00 UTC (Time Stamp: 1849698000)\n\nVesting details:\n- from_address: [ION DAO Governance contract](https://celatone.osmosis.zone/osmosis-1/contracts/osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm)\n- to_address: Dev Wallet (**osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk**)\n- Token denom: uion\n- Amount of the vesting: 3407.04 ION\n- Veting end: Saturday, August 12, 2028, 13:00:00 UTC (Timestamp: 1849698000)\n- Vesting start: Together with the passing of the on-chain voting for Proposal #11\n\n## The vesting will be only executed once\nFirst and foremost, we would like to emphasize that the passing of this Proposal will NOT initiate a duplicated vesting scheme. In other words, the Stargate message in Proposal #10 will never be executed, and the corrected message in Proposal #11 will be executed instead.\n\nPlease actively participate in the upcoming governance. Your participation will be much appreciated.\n\nION DAO governance guide: [https://medium.com/@IBCindex/how-to-participate-in-ion-dao-governance-bd9c63899f76](https://medium.com/@IBCindex/how-to-participate-in-ion-dao-governance-bd9c63899f76)\n\nCommonWealth Thread: [https://commonwealth.im/ion/discussion/12475-execution-of-the-dev-funding](https://commonwealth.im/ion/discussion/12475-execution-of-the-dev-funding)",
+    "proposer": "osmo14n3a65fnqz9jve85l23al6m3pjugf0atvrfqh5",
+    "msgs": [
+      {
+        "stargate": {
+          "type_url": "/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
+          "value": "Cj9vc21vMWs4cmU3and6NnJubndya3RuZWpkd2t3bm5jdGU3ZWs3Z3QyOWd2bmwzc2RyZzltdG5xa3NlNm5tcW0SK29zbW8xZzZjang5Zmp1MGxlNXB0eDcwcndydWNqOXFxbmd2MzlyenU4cmsaEQoDaW9uEgozNDA3MDQwMDAwINDNgPIG"
+        }
+      }
+    ],
+    "status": "passed",
+    "submitted_at": {
+      "height": 10841999,
+      "time": "1691154037875470040"
+    },
+    "deposit_ends_at": {
+      "at_time": "1691758837875470040"
+    },
+    "vote_starts_at": {
+      "height": 10842283,
+      "time": "1691155683878888092"
+    },
+    "vote_ends_at": {
+      "at_time": "1691760483878888092"
+    },
+    "votes": {
+      "yes": "641166962",
+      "no": "10555882",
+      "abstain": "4670107",
+      "veto": "0"
+    },
+    "quorum": "0.375023865534724845",
+    "threshold": {
+      "threshold": "0.5",
+      "quorum": "0.3",
+      "veto_threshold": "0.3"
+    },
+    "total_votes": "656392951",
+    "total_weight": "1750269813",
+    "total_deposit": "500000",
+    "deposit_base_amount": "500000",
+    "deposit_claimable": false
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "account": {
+    "type": "/cosmos.vesting.v1beta1.ContinuousVestingAccount",
+    "value": {
+      "base_vesting_account": {
+        "base_account": {
+          "address": "osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk",
+          "public_key": {
+            "type": "/cosmos.crypto.secp256k1.PubKey",
+            "value": "Aih5bVIQqTT6FG7/KPNqKefOnHH0FuCZu3GbNqXjeFCL"
+          },
+          "account_number": "906739",
+          "sequence": "135"
+        },
+        "original_vesting": [
+          {
+            "denom": "uion",
+            "amount": "3407040000"
+          }
+        ],
+        "delegated_free": [
+          {
+            "denom": "uosmo",
+            "amount": "20000"
+          }
+        ],
+        "delegated_vesting": [],
+        "end_time": "1850742000"
+      },
+      "start_time": "1692806078"
+    }
+  }
+}

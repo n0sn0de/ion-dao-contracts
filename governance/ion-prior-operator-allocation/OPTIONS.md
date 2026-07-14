@@ -13,12 +13,12 @@ This document compares technical/governance paths. It is not legal advice and do
 | Authz-assisted future transfers | Yes after proof | Yes | No | Revocable, no reservation/scheduler, DAO-grantee path unproven | Conditional only |
 | Voluntary voting/transfer covenant | Yes to recognize | Yes | No | Mainly contractual/social enforcement | Supplemental |
 | Tender or negotiated buyback | Yes, subject to treasury approval | Yes | No | Valuation, conflicts, market impact | Possible settlement tool |
-| Leave allocation intact and monitor | Yes | No | No | Concentration remains | Lawful/default baseline absent stronger rights |
+| Leave allocation intact and monitor | Yes | No | No | Concentration remains | Current technical status quo absent consent or an authorized remedy |
 | Prospective treasury segmentation | Yes after modernization | No | No | Does not alter account balance | Worth separate design review |
 | Custom voting cap/quadratic module | Requires custom contracts | No | No | Rights change, UI/audit/legitimacy risk | Do not rush into modernization |
 | Native `uion` blacklist/freeze | No ordinary path | No | Yes | Bespoke bank-state intervention | Not recommended absent extraordinary evidence/process |
 | Forced balance rewrite | No | No | Yes | Software upgrade, validator adoption, legal/precedent/fork risk | Last resort only |
-| Replacement-token exclusion/dilution | No simple path | No | Usually | Economically confiscatory and ecosystem-breaking | Not recommended |
+| Replacement-token exclusion/dilution | No simple path | No | Usually | Alters balances/fungibility and can disrupt pools, contracts, IBC representations, integrations, and third parties | Not recommended |
 
 ## Option 1 — publish a neutral evidence record
 
@@ -104,11 +104,12 @@ This is preferable to a technically elaborate Authz flow if direct installments 
 
 ## Option 5 — Authz-assisted future transfers
 
-A consensual `SendAuthorization` may contain:
+A `SendAuthorization` may contain:
 
 - `uion` spend limit;
-- receiver allowlist;
-- expiration.
+- receiver allowlist.
+
+The expiration is a field of the enclosing Authz `Grant` carried by `MsgGrant`, not a field of `SendAuthorization`.
 
 A DAO-core grantee is not automatically workable. `MsgExec`’s signer is the grantee. An external operator cannot sign as a contract address; a successfully executed DAO proposal must emit the exact `MsgExec`.
 
@@ -164,7 +165,7 @@ This can reduce risk but does not change on-chain voting rights unless accompani
 
 ## Option 8 — leave the allocation intact and mitigate prospectively
 
-Absent consent or stronger verified rights, leaving the account unchanged is the technical/legal baseline.
+Absent consent or a separately authorized remedy, leaving the account unchanged is the current technical status quo. This package does not determine the legal baseline.
 
 Prospective controls may include:
 
@@ -214,7 +215,7 @@ A software-upgrade proposal could authorize a bespoke binary/handler that rewrit
 Minimum process before even drafting code:
 
 - credible authenticated evidence reviewed by qualified counsel or a competent forum;
-- specifically defined unauthorized transfer, material transactional error, or adjudicated/enforceable obligation;
+- specifically defined unauthorized transfer, material transactional error, or obligation established by a competent adjudication/order;
 - standing/authority analysis for ION DAO and Osmosis governance;
 - notice, evidence access, and meaningful response opportunity;
 - independent decision-makers and conflicts;

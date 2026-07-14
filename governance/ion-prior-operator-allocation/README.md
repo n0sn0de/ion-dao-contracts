@@ -23,6 +23,8 @@ This is a technical conclusion, not a legal one. The reviewed proposal text cont
 - [`EVIDENCE.md`](EVIDENCE.md) — height-pinned proposal/account/balance evidence
 - [`OPTIONS.md`](OPTIONS.md) — response matrix and technical/legal boundaries
 - [`REPRODUCE.md`](REPRODUCE.md) — archive-height query and decoding procedure
+- [`SOURCE-PINS.md`](SOURCE-PINS.md) — commit- and line-pinned SDK/Authz sources
+- [`evidence-manifest.json`](evidence-manifest.json) — SHA-256 manifest for retained public-chain receipts in [`evidence/`](evidence/)
 - companion modernization roadmap: [PR #7](https://github.com/n0sn0de/ion-dao-contracts/pull/7)
 
 ## Height-pinned account state
@@ -242,7 +244,7 @@ A bespoke Osmosis software upgrade could technically rewrite auth/bank state. A 
 Consider even investigating that path only if:
 
 - credible authenticated evidence is reviewed by qualified counsel or a competent forum;
-- the issue is a specifically defined unauthorized transfer, material transactional error, or adjudicated/enforceable obligation—not political regret;
+- the issue is a specifically defined unauthorized transfer, material transactional error, or obligation established by a competent adjudication/order—not political regret;
 - affected parties receive notice, evidence access, and a meaningful response opportunity;
 - conflicts and independent decision-makers are disclosed;
 - proportionality and least-intrusive remedies are analyzed;

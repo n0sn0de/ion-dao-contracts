@@ -54,7 +54,7 @@ Execution transaction:
 - hash: `1E15143F3135DEAB9D902F03F5D54D4B53EB65D8593E77CDDA773AC57CEFE245`
 - height: `11126209`
 - time: `2023-08-23T15:54:38Z`
-- outer executor: `osmo1razrwml37rlgemxtp60yg3yku84t5f4g2tn5fl`
+- outer executor: `osmo1udw4032y7my0q9y0mp8ffry5m2u5xl3de46ex0`
 - explorer receipt: [Mintscan transaction](https://www.mintscan.io/osmosis/tx/1E15143F3135DEAB9D902F03F5D54D4B53EB65D8593E77CDDA773AC57CEFE245?height=11126209)
 
 The outer executor triggered an already-approved proposal; it was not the source or recipient of the vesting transfer.
@@ -187,8 +187,9 @@ No relevant Authz grant by the vesting account was identified at the reviewed he
 A future voluntary `SendAuthorization` could specify:
 
 - `uion` spend limit;
-- receiver allowlist;
-- expiration.
+- receiver allowlist.
+
+Expiration belongs to the enclosing Authz `Grant` in `MsgGrant`, not to `SendAuthorization` itself.
 
 But it would not:
 
@@ -214,11 +215,16 @@ Vesting account:
 
 The addresses differ. No reviewed evidence established common control. Different addresses also do not prove different real-world control.
 
-## Governance-legitimacy uncertainty
+## Proposal 12 stored-threshold reconciliation
 
-Proposal 12 is recorded as executed and the account/transfer are independently verified. Current migrated proposal state reports vote/weight fields that do not obviously reconcile with the stored quorum under the published legacy code.
+The migrated proposal fields reconcile with the stored thresholds:
 
-Before using proposal 12 as pristine evidence of governance legitimacy, replay the original code ID 3 behavior against historical state and retain the historical execution transaction/events. This uncertainty does not change the verified account type or transfer.
+- turnout `543674660 / 1750300392 = 0.310617915921714539`;
+- required quorum votes `525090118`, actual votes `543674660`;
+- required Yes votes `269817265`, actual Yes `530889418`;
+- Veto votes `0`.
+
+The proposal is recorded as executed, and the transfer/account creation are independently verified.
 
 ## What the evidence does not determine
 

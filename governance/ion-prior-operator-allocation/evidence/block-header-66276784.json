@@ -1,0 +1,27 @@
+{
+  "header": {
+    "version": {
+      "block": "11",
+      "app": "0"
+    },
+    "chain_id": "osmosis-1",
+    "height": "66276784",
+    "time": "2026-07-14T05:23:51.419944203Z",
+    "last_block_id": {
+      "hash": "8LzGa1R4Wf+QZTmgwshic9PaunXJy6f/Rx5VRd04nyE=",
+      "part_set_header": {
+        "total": 1,
+        "hash": "8w+NFlywkgbdSfss6lGgZCxrl+0pVQO076ZDFFr79ZA="
+      }
+    },
+    "last_commit_hash": "c0s4qHzdBtFbkv9xniG+qgOVlurtDPntcND+gQM8rvE=",
+    "data_hash": "zoK2pQ1THn9OQUam2i6TX1azPo8YWMh81LU/rw88VMM=",
+    "validators_hash": "36E6gVl2k5vCGAjoOnC6kqgaeYEe2SOEEar0rEbnXmM=",
+    "next_validators_hash": "36E6gVl2k5vCGAjoOnC6kqgaeYEe2SOEEar0rEbnXmM=",
+    "consensus_hash": "JIS7qLmeUx4aP2QiNi59PuuZqDJRGZaKNV8FwJ7t1As=",
+    "app_hash": "I09jPT27UgiS2xuU9hIe6FIlR3RX4Y7hBkBlON/Gk5g=",
+    "last_results_hash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+    "evidence_hash": "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+    "proposer_address": "CnCRLRjhPXjLMuYyKk5X+GHmw8g="
+  }
+}

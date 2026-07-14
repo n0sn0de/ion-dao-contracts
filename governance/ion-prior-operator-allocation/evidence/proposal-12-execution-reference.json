@@ -1,0 +1,11 @@
+{
+  "chain_id": "osmosis-1",
+  "tx_hash": "1E15143F3135DEAB9D902F03F5D54D4B53EB65D8593E77CDDA773AC57CEFE245",
+  "height": "11126209",
+  "time": "2023-08-23T15:54:38Z",
+  "outer_sender": "osmo1udw4032y7my0q9y0mp8ffry5m2u5xl3de46ex0",
+  "ion_dao": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+  "vesting_account": "osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk",
+  "mintscan": "https://www.mintscan.io/osmosis/tx/1E15143F3135DEAB9D902F03F5D54D4B53EB65D8593E77CDDA773AC57CEFE245?height=11126209",
+  "celatone": "https://celat.one/osmosis-1/txs/1E15143F3135DEAB9D902F03F5D54D4B53EB65D8593E77CDDA773AC57CEFE245"
+}

@@ -1,0 +1,49 @@
+{
+  "data": {
+    "id": 12,
+    "title": "[Revised Proposal] dev funding",
+    "link": "https://ion.wtf/proposal/ion/11",
+    "description": "## Summary\nBy voting YES on this Proposal, ION stakers voice their support for executing the attached Stargate message to allocate 3,407.04 ION (16% of the total supply) to the dev contributors’ wallet osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk over a period of 60 months.\n\n## What is this proposal about?\nAfter [Proposal #11](https://ion.wtf/proposal/ion/11), we need to pass another (and final) Proposal to initiate the vesting of the dev funding. Please take a moment to read the following details.\n\n## Details\nWe made a mistake in [Proposal #11](https://ion.wtf/proposal/ion/11).\n\nTLDR: the denom in the message payload to create the vesting account was “ion.” It was supposed to be “uion,” the mainnet denom of the ION token. Let us elaborate.\n\nTo initiate the dev funding, the vesting account should be created first by the Cosmos SDK “MsgCreateVestingAccount” message. So we prepared a message with the components in the below image to create the vesting account.\n\n![image](https://i.pinimg.com/564x/b5/39/15/b53915c015a55056e27fceb4c11a29c5.jpg)\n\nWe tested this message by creating and using a test token called “mion” on the testnet environment before uploading Proposal #11. This is one of our quality assurance protocols to ensure the message gets executed when the Proposal is passed. The two “mion” test transactions can be found here:\n1. [https://celatone.osmosis.zone/osmo-test-5/txs/11328094DA7AEF41D98C569AB0C7EED85F93E2FD74967A0E3DB07C6C162F9F78](https://celatone.osmosis.zone/osmo-test-5/txs/11328094DA7AEF41D98C569AB0C7EED85F93E2FD74967A0E3DB07C6C162F9F78)\n2. [https://celatone.osmosis.zone/osmo-test-5/txs/CC0BA0F043427FDD71AC38A42751E3CDC88FB635DF9BC70493581D3780061749](https://celatone.osmosis.zone/osmo-test-5/txs/CC0BA0F043427FDD71AC38A42751E3CDC88FB635DF9BC70493581D3780061749) - (includes the end of vesting)\n\nAs it’s evident in the transactions above, the message was correctly prepared and went through.\n\nThe issue was that we incorrectly put in “ion” for the “Token denom” of the message payload, instead of ION’s mainnet denom of “uion.” This is why Proposal #11 could not and will not be executed.\n\n(You can decode ```Cj9vc21vMWs4cmU3and6NnJubndya3RuZWpkd2t3bm5jdGU3ZWs3Z3QyOWd2bmwzc2RyZzltdG5xa3NlNm5tcW0SK29zbW8xZzZjang5Zmp1MGxlNXB0eDcwcndydWNqOXFxbmd2MzlyenU4cmsaEQoDaW9uEgozNDA3MDQwMDAwINDNgPIG``` on [https://protobuf-decoder.netlify.app/](https://protobuf-decoder.netlify.app/), then you will see the “ion” denom)\n\n## Our Apology and Promise\nWe have no excuse for making this mistake. First and foremost, we apologize to the ION community for causing this inconvenience. \n\nAfter identifying this blunder, our team had a series of recap sessions to go over our code review and QA protocols. We do try our best, but we acknowledge that we can and should make improvements to be better. We’ve revamped and calibrated our QA processes and communication cadences to make sure efficient and correct execution of ION governance Proposals going forward. We assure you that the same mistake will never be repeated again in the future.\n\nOn a side note, our team is laser-focused on building the things we have in store for ION DAO. We’re very much looking forward to unveiling these plans and discussing them with the community. \n\nAlso on a (very encouraging) side note, governance participation rate has improved by a lot! The latest ION DAO Proposal (Proposal #11) passed with a 37.5% turnout, exceeding the requirement by 7.5%. This was the highest level of participation since the passing of Proposal #4, after which the requirement was reduced from 50% to 30%.\n\nWe’re excited and looking forward to leading the next steps for ION DAO. For us to move on, we would like to request the community to vote for this proposal (once again) so the dev funding can get started. \n\nAs always, your active participation will be much appreciated!\n\nPlease note:\nThe vesting for dev funding will be executed only once. The passing of this Proposal will NOT initiate a duplicated vesting scheme. In other words, the Stargate message in Proposal #10 and #11 will never be executed, and the corrected message in Proposal #12 will be executed instead.\n\n## New Payload\n```\n[\n  {\n    \"stargate\": {\n      \"type_url\": \"/cosmos.vesting.v1beta1.MsgCreateVestingAccount\",\n      \"value\": \"Cj9vc21vMWs4cmU3and6NnJubndya3RuZWpkd2t3bm5jdGU3ZWs3Z3QyOWd2bmwzc2RyZzltdG5xa3NlNm5tcW0SK29zbW8xZzZjang5Zmp1MGxlNXB0eDcwcndydWNqOXFxbmd2MzlyenU4cmsaEgoEdWlvbhIKMzQwNzA0MDAwMCDwqcDyBg==\"\n    }\n  }\n]\n```\n\n**Details**\n- from_address: osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm\n- to_address: osmo1g6cjx9fju0le5ptx70rwrucj9qqngv39rzu8rk (Dev wallet)\n- Token denom: uion\n- Amount of the vesting: 3407.04 (Decimal: 6)\n- Vesting end: August 24th, 2028, 15:00:00 UTC (1850742000)\n- Vesting start: Together with the passing of the on-chain voting for Proposal #12\n\nTest Transaction\n  - Upload Proposal: [https://celatone.osmosis.zone/osmo-test-5/txs/794A0332FED88F1B223C2E3AB9B151781F0E291C50BFB39FB9651C727D39385E](https://celatone.osmosis.zone/osmo-test-5/txs/794A0332FED88F1B223C2E3AB9B151781F0E291C50BFB39FB9651C727D39385E)\n  - Deposit ION: [https://celatone.osmosis.zone/osmo-test-5/txs/9D1640D6894DC4E4532F723F6DEE96A68B4A8FE75144717F60281B3F8A49F323](https://celatone.osmosis.zone/osmo-test-5/txs/9D1640D6894DC4E4532F723F6DEE96A68B4A8FE75144717F60281B3F8A49F323)\n  - Execute: [https://celatone.osmosis.zone/osmo-test-5/txs/A564233702B370F5C90A74994FCCD16A91DD6D4883C1F2FD808A14F0D1F23453](https://celatone.osmosis.zone/osmo-test-5/txs/A564233702B370F5C90A74994FCCD16A91DD6D4883C1F2FD808A14F0D1F23453)",
+    "proposer": "osmo14n3a65fnqz9jve85l23al6m3pjugf0atvrfqh5",
+    "msgs": [
+      {
+        "stargate": {
+          "type_url": "/cosmos.vesting.v1beta1.MsgCreateVestingAccount",
+          "value": "Cj9vc21vMWs4cmU3and6NnJubndya3RuZWpkd2t3bm5jdGU3ZWs3Z3QyOWd2bmwzc2RyZzltdG5xa3NlNm5tcW0SK29zbW8xZzZjang5Zmp1MGxlNXB0eDcwcndydWNqOXFxbmd2MzlyenU4cmsaEgoEdWlvbhIKMzQwNzA0MDAwMCDwqcDyBg=="
+        }
+      }
+    ],
+    "status": "executed",
+    "submitted_at": {
+      "height": 11022480,
+      "time": "1692201240934734586"
+    },
+    "deposit_ends_at": {
+      "at_time": "1692806040934734586"
+    },
+    "vote_starts_at": {
+      "height": 11022480,
+      "time": "1692201240934734586"
+    },
+    "vote_ends_at": {
+      "at_time": "1692806040934734586"
+    },
+    "votes": {
+      "yes": "530889418",
+      "no": "8745112",
+      "abstain": "4040130",
+      "veto": "0"
+    },
+    "quorum": "0.310617915921714539",
+    "threshold": {
+      "threshold": "0.5",
+      "quorum": "0.3",
+      "veto_threshold": "0.3"
+    },
+    "total_votes": "543674660",
+    "total_weight": "1750300392",
+    "total_deposit": "500000",
+    "deposit_base_amount": "500000",
+    "deposit_claimable": true
+  }
+}

@@ -80,6 +80,14 @@ osmosisd query wasm contract-state smart "$STAKE" \
 osmosisd query wasm contract-state smart "$STAKE" \
   "{\"claims\":{\"address\":\"$VESTING\"}}" \
   --height "$H" --node "$NODE" -o json
+
+osmosisd query wasm contract-state smart "$STAKE" \
+  '{"total_value":{}}' \
+  --height "$H" --node "$NODE" -o json
+
+osmosisd query wasm contract-state smart "$STAKE" \
+  '{"total_power_at_height":{"height":null}}' \
+  --height "$H" --node "$NODE" -o json
 ```
 
 Expected:
@@ -87,6 +95,8 @@ Expected:
 ```text
 staked value: 151700000 uion
 claims:       []
+total value:  1671832757 uion
+total power:  1671832757 uion
 ```
 
 ## ION supply
@@ -223,6 +233,16 @@ Repeat at the exact same `H` through a second archive endpoint:
 - Authz grants.
 
 Mismatch is an abort condition.
+
+## Retained evidence package
+
+This directory now contains:
+
+- raw public-chain query receipts under [`evidence/`](evidence/);
+- [`evidence-manifest.json`](evidence-manifest.json) with SHA-256 and byte length for every receipt/source note;
+- [`SOURCE-PINS.md`](SOURCE-PINS.md) with immutable source commits and line ranges.
+
+Verify the manifest before relying on the package.
 
 ## Publication boundary
 

@@ -17,10 +17,15 @@ canonical submission, vote, final-tally, execution, migration, and legacy-watch 
 - Audited code hash: `37bb98453ddf9495c2cdf9a2667d515164ef9e09b15385921eaba9270d148f3e`
 - Legacy cutoff height: `66198261`
 - Legacy proposals `22-39`: `662 ION` recorded across 18 unclaimed deposit entries at verification
+- Treasury accounting: `9 ION` nominal retained deposits and `653 ION` unsafe
+  recorded overage; live target balance `1,931.931671 ION`
 
 The migration does **not** recover or redistribute historical deposits. It
 quarantines the unsafe legacy claim path while preserving post-migration
-governance behavior.
+governance behavior. Expiration does not automatically pay a claim or move
+treasury funds. The `653 ION` overage therefore remains in the DAO contract;
+the `9 ION` nominal retained deposits also remain quarantined until a separate,
+auditable reconciliation is authorized.
 
 ## Recommendation
 

@@ -1,6 +1,6 @@
 {
   "schema": "ion-dao-osmosis-governance-remediation-receipt/v2",
-  "verified_at": "2026-07-13T05:22:29Z",
+  "verified_at": "2026-07-14T00:23:02Z",
   "chain_id": "osmosis-1",
   "source": {
     "merged_dev_commit": "403e7665186deedfaa4983f576fcb7cc30632f32",
@@ -98,9 +98,22 @@
       "denom": "uion",
       "amount": "662000000"
     },
+    "nominal_retained_deposit_amount": {
+      "denom": "uion",
+      "amount": "9000000"
+    },
+    "unsafe_recorded_overage": {
+      "denom": "uion",
+      "amount": "653000000"
+    },
+    "contract_balance_before_proposal_22": {
+      "height": "65993042",
+      "denom": "uion",
+      "amount": "1922931671"
+    },
     "contract_balance_at_verification": {
       "denom": "uion",
-      "amount": "10000000"
+      "amount": "1931931671"
     },
     "all_submitted_at_or_before_cutoff": true,
     "all_deposits_unclaimed_at_verification": true,
@@ -112,7 +125,7 @@
   "scope": {
     "migration_recovers_historical_deposits": false,
     "migration_redistributes_historical_deposits": false,
-    "effect": "The migration quarantines claims for proposals submitted at or before the one-time cutoff while preserving the post-migration proposal path."
+    "effect": "The migration quarantines claims for proposals submitted at or before the one-time cutoff while preserving the post-migration proposal path. Voting-period expiration does not transfer funds. The 653000000uion recorded overage therefore remains blocked from payout; the 9000000uion nominal retained deposits also remain quarantined pending separately authorized manual reconciliation."
   },
   "prebroadcast_rejection": {
     "txhash": "E0CD9878306669B8E6E2561EDB3DA7AADE17621AA61CF4E2316D361C27B9ECF6",

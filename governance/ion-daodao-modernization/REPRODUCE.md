@@ -125,12 +125,14 @@ Retain page inputs and outputs so another reviewer can prove no address was skip
 ```bash
 export IBCX_NEW='osmo14klwqgkmackvx2tqa0trtg69dmy0nrg4ntq4gjgw2za4734r5seqjqm4gm'
 export IBCX_ST='osmo1xqw2sl9zk8a6pch0csaw78n4swg5ws8t62wc5qta4gnjxfqg6v2qcs243k'
-export IBCX_OLD='osmo1yhd9tzp09d833u7ray4pudxjnx2q7zcq2s0g9r7cl2w73mj5qqcjwhxt'
+export IBCX_OLD='osmo1yhd9tzp09d833u7ray4pc6wwp72aewtt2xwakszn3lzlf2klnlwscjwhxt'
 
 for A in "$IBCX_NEW" "$IBCX_ST" "$IBCX_OLD"; do
   osmosisd query wasm contract "$A" --height "$H" --node "$NODE" -o json
   osmosisd query wasm contract-state smart "$A" \
-    '{"config":{}}' --height "$H" --node "$NODE" -o json
+    '{"get_config":{}}' --height "$H" --node "$NODE" -o json
+  osmosisd query wasm contract-state smart "$A" \
+    '{"get_fee":{"time":null}}' --height "$H" --node "$NODE" -o json
   osmosisd query bank balances "$A" --height "$H" --node "$NODE" -o json
 done
 ```
@@ -173,6 +175,10 @@ Repeat at the exact same `H` through a second archive endpoint:
 - IBCX control state.
 
 Mismatch is an abort condition.
+
+## Retained evidence package
+
+This directory contains retained public-chain receipts under [`evidence/`](evidence/), immutable source references in [`SOURCE-PINS.md`](SOURCE-PINS.md), and their byte lengths/SHA-256 values in [`evidence-manifest.json`](evidence-manifest.json). Verify the manifest before relying on the package.
 
 ## Production boundary
 

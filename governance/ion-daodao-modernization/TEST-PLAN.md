@@ -62,7 +62,7 @@ Review exact tag/source for:
 - revoting completion behavior;
 - `only_members_execute` enforcement;
 - `close_proposal_on_execution_failure` behavior;
-- `OnlyPassed` refund only for successfully Executed status;
+- `OnlyPassed` completion-hook ordering, including refund on `ExecutionFailed` when close-on-failure is enabled;
 - pre-propose whole-denom withdrawal semantics;
 - proposal and voting snapshots;
 - native `uion` acceptance.
@@ -141,7 +141,7 @@ Test:
 |---|---|
 | Successfully executed proposal | Deposit refunded exactly once |
 | Passed but not executed | Deposit remains escrowed |
-| Execution fails with close-on-failure | Final status and deposit destination match exact completion hook |
+| Execution fails with close-on-failure | Final status `ExecutionFailed`; proposer deposit refunded because the prior Executed hook already ran |
 | Rejected proposal | Deposit follows reviewed non-executed policy |
 | Duplicate completion hook | Rejected |
 | Deposit amount/denom mismatch | Rejected |

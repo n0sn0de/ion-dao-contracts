@@ -36,6 +36,8 @@ The production successor address does not exist yet. It must not be guessed or p
 - [`TEST-PLAN.md`](TEST-PLAN.md) — source, simulation, canary, and acceptance gates
 - [`JUNO-VALIDATION.md`](JUNO-VALIDATION.md) — completed bounded Juno proof and its limits
 - [`REPRODUCE.md`](REPRODUCE.md) — height-pinned read-only query recipe
+- [`SOURCE-PINS.md`](SOURCE-PINS.md) — immutable source references for transition semantics
+- [`evidence-manifest.json`](evidence-manifest.json) — SHA-256 manifest for retained evidence receipts in [`evidence/`](evidence/)
 - companion assessment: [PR #8](https://github.com/n0sn0de/ion-dao-contracts/pull/8)
 
 ## What is being replaced
@@ -138,7 +140,7 @@ The legacy DAO controls three live IBCX-family contracts:
 |---|---|---|---|
 | New IBCX | `osmo14klwqgkmackvx2tqa0trtg69dmy0nrg4ntq4gjgw2za4734r5seqjqm4gm` | `ibcx-core 0.1.2` | Wasm admin, application `gov`, fee collector |
 | stIBCX | `osmo1xqw2sl9zk8a6pch0csaw78n4swg5ws8t62wc5qta4gnjxfqg6v2qcs243k` | `ibcx-core 0.1.1` | Wasm admin, application `gov`, fee collector |
-| Old IBCX | `osmo1yhd9tzp09d833u7ray4pudxjnx2q7zcq2s0g9r7cl2w73mj5qqcjwhxt` | `ibcx-core 0.1.1` | Wasm admin, application `gov`, fee collector |
+| Old IBCX | `osmo1yhd9tzp09d833u7ray4pc6wwp72aewtt2xwakszn3lzlf2klnlwscjwhxt` | `ibcx-core 0.1.1` | Wasm admin, application `gov`, fee collector |
 
 Their backing portfolios belong to index-token holders. They are **not DAO treasury** and must never be swept during modernization.
 

@@ -80,10 +80,10 @@ The stake contract has no retire or pause message and remains callable indefinit
 |---|---:|
 | `uion` | `1931931671` |
 | `uosmo` | `2100008` |
-| `ibc/C360EF60DBDE0C2B179A02C8B2A24CDBD7C6C58EBBD92D5195B8B5F85EF7D9B` | `5000000` |
-| `factory/osmo14klwqgkmackvx2tqa0trtg69dmy0nrg4ntq4gjgw2za4734r5seqjqm4gm/uibcx` | `2` |
-| `factory/osmo1xqw2sl9zk8a6pch0csaw78n4swg5ws8t62wc5qta4gnjxfqg6v2qcs243k/stuibcx` | `4` |
-| `factory/osmo1yhd9tzp09d833u7ray4pudxjnx2q7zcq2s0g9r7cl2w73mj5qqcjwhxt/uibcx` | `4` |
+| `ibc/C360EF34A86D334F625E4CBB7DA3223AEA97174B61F35BB3758081A8160F7D9B` | `5000000` |
+| `factory/osmo14klwqgkmackvx2tqa0trtg69dmy0nrg4ntq4gjgw2za4734r5seqjqm4gm/uibcx` | `10757359` |
+| `factory/osmo1xqw2sl9zk8a6pch0csaw78n4swg5ws8t62wc5qta4gnjxfqg6v2qcs243k/stuibcx` | `7345624` |
+| `factory/osmo1yhd9tzp09d833u7ray4pc6wwp72aewtt2xwakszn3lzlf2klnlwscjwhxt/uibcx` | `3000` |
 
 The legacy token list reports only `uion`; it is not an exhaustive asset registry.
 
@@ -162,11 +162,11 @@ The contract recalculates from current supply. A supply increase can deactivate 
 
 The legacy DAO controls three application contracts:
 
-| Product | Contract | CW2 | Wasm admin | App `gov` | `pending_gov` | Fee collector |
-|---|---|---|---|---|---|---|
-| New IBCX | `osmo14klwqgkmackvx2tqa0trtg69dmy0nrg4ntq4gjgw2za4734r5seqjqm4gm` | `ibcx-core 0.1.2` | Legacy DAO | Legacy DAO | none | Legacy DAO |
-| stIBCX | `osmo1xqw2sl9zk8a6pch0csaw78n4swg5ws8t62wc5qta4gnjxfqg6v2qcs243k` | `ibcx-core 0.1.1` | Legacy DAO | Legacy DAO | none | Legacy DAO |
-| Old IBCX | `osmo1yhd9tzp09d833u7ray4pudxjnx2q7zcq2s0g9r7cl2w73mj5qqcjwhxt` | `ibcx-core 0.1.1` | Legacy DAO | Legacy DAO | none | Legacy DAO |
+| Product | Contract | Code ID | CW2 | Wasm admin | App `gov` | `pending_gov` | Fee collector |
+|---|---|---:|---|---|---|---|---|
+| New IBCX | `osmo14klwqgkmackvx2tqa0trtg69dmy0nrg4ntq4gjgw2za4734r5seqjqm4gm` | 458 | `ibcx-core 0.1.2` | Legacy DAO | Legacy DAO | none | Legacy DAO |
+| stIBCX | `osmo1xqw2sl9zk8a6pch0csaw78n4swg5ws8t62wc5qta4gnjxfqg6v2qcs243k` | 49 | `ibcx-core 0.1.1` | Legacy DAO | Legacy DAO | none | Legacy DAO |
+| Old IBCX | `osmo1yhd9tzp09d833u7ray4pc6wwp72aewtt2xwakszn3lzlf2klnlwscjwhxt` | 47 | `ibcx-core 0.1.1` | Legacy DAO | Legacy DAO | none | Legacy DAO |
 
 Each contract holds a multi-asset backing portfolio. Those portfolios are obligations/assets of index-token holders, not DAO treasury.
 

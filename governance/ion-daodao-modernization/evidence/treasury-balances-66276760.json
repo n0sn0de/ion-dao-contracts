@@ -1,0 +1,31 @@
+{
+  "chain_id": "osmosis-1",
+  "height": "66276760",
+  "address": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+  "balances": [
+    {
+      "denom": "factory/osmo14klwqgkmackvx2tqa0trtg69dmy0nrg4ntq4gjgw2za4734r5seqjqm4gm/uibcx",
+      "amount": "10757359"
+    },
+    {
+      "denom": "factory/osmo1xqw2sl9zk8a6pch0csaw78n4swg5ws8t62wc5qta4gnjxfqg6v2qcs243k/stuibcx",
+      "amount": "7345624"
+    },
+    {
+      "denom": "factory/osmo1yhd9tzp09d833u7ray4pc6wwp72aewtt2xwakszn3lzlf2klnlwscjwhxt/uibcx",
+      "amount": "3000"
+    },
+    {
+      "denom": "ibc/C360EF34A86D334F625E4CBB7DA3223AEA97174B61F35BB3758081A8160F7D9B",
+      "amount": "5000000"
+    },
+    {
+      "denom": "uion",
+      "amount": "1931931671"
+    },
+    {
+      "denom": "uosmo",
+      "amount": "2100008"
+    }
+  ]
+}

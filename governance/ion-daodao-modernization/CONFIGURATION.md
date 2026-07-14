@@ -108,13 +108,14 @@ It does not cap address-level voting power. The prior-operator vesting concentra
 |---|---|---|
 | Submission policy | Specific: `dao_members = true`, empty allowlist and denylist | Only stakers may consume governance attention |
 | Deposit | Exactly `1,000,000 uion` / 1 ION | Material spam bond without reproducing partial-top-up logic |
-| Refund policy | `OnlyPassed` | Refund only after successful proposal execution |
+| Refund policy | `OnlyPassed` | Refund Executed proposals; under v2.7.0 with close-on-failure, failed execution is also refunded because the Executed completion hook runs before the error reply changes status |
 
 Important semantics:
 
-- `OnlyPassed` is refunded for `Status::Executed`, not merely `Status::Passed`.
-- Rejected or execution-failed proposal handling must be verified against the exact completion hook.
-- With retryable execution failures, a Passed proposal’s bond can remain escrowed indefinitely.
+- `OnlyPassed` is refunded when the pre-propose module receives an `Executed` completion hook.
+- With `close_proposal_on_execution_failure = true`, v2.7.0 emits that hook before the failed-submessage reply changes final status to `ExecutionFailed`; the proposer is therefore refunded on execution failure too.
+- Rejected, Closed, and Vetoed completion-hook handling must be verified against the exact v2.7.0 source/tests.
+- With retryable execution failures (`close_proposal_on_execution_failure = false`), a Passed proposal’s bond can remain escrowed indefinitely.
 - Deposit settlement must be tested exactly once for Executed, Rejected, Closed, and ExecutionFailed statuses.
 
 ### Pre-propose balance withdrawal
@@ -149,7 +150,7 @@ Do not call a prose-only mandate technically bounded.
 
 ## Execution and retries
 
-- A proposal must be successfully Executed before its `OnlyPassed` bond is refunded.
+- `OnlyPassed` does not mean “successful execution only” under the recommended v2.7.0 close-on-failure combination; failed execution also refunds because of hook ordering.
 - Members-only execution reduces, but does not eliminate, bad-timing execution risk.
 - Every proposal with external state preconditions must query them immediately before voting closes and before execution.
 - Failed final handoff execution must not partially mutate state; exact simulation and Cosmos transaction atomicity must be verified.

@@ -1,0 +1,69 @@
+{
+  "block_time": "2026-07-14T05:23:22.014415229Z",
+  "chain_id": "osmosis-1",
+  "files": [
+    {
+      "bytes": 323,
+      "path": "evidence/ibcx-new-config-66276760.json",
+      "sha256": "89f15de51578345e2db5f71dd11b2940ff3123170353590328c67bb64a369b6d"
+    },
+    {
+      "bytes": 449,
+      "path": "evidence/ibcx-new-contract-66276760.json",
+      "sha256": "2e56568bc7f54703103729beb828de224ac1ab314b8d143e6540ab4b797b60d6"
+    },
+    {
+      "bytes": 1905,
+      "path": "evidence/ibcx-new-fee-66276760.json",
+      "sha256": "4d3828c2104735d12adb7b48575631e74c3859dcaac6e96ffdb269894bfe525f"
+    },
+    {
+      "bytes": 323,
+      "path": "evidence/ibcx-old-config-66276760.json",
+      "sha256": "6d107e70b5fa2cbf83aa7a26f55c9371a2c10a512c32ce6cd72e1bdcc9010057"
+    },
+    {
+      "bytes": 448,
+      "path": "evidence/ibcx-old-contract-66276760.json",
+      "sha256": "a63f35bcc03ceee684dcc49a982a1b36ba32e701de81c2c2c47f3b855f819a75"
+    },
+    {
+      "bytes": 1858,
+      "path": "evidence/ibcx-old-fee-66276760.json",
+      "sha256": "077954b0ad818fba3f5817972b01cea3663d7a21f915402e3322fbf1eafde543"
+    },
+    {
+      "bytes": 325,
+      "path": "evidence/ibcx-st-config-66276760.json",
+      "sha256": "b862ca964fcffb046a057f3f128d9b368f3e549def6e90235a8ee34867a26543"
+    },
+    {
+      "bytes": 446,
+      "path": "evidence/ibcx-st-contract-66276760.json",
+      "sha256": "de06b274acacd1a1d449c4b40d486bd3486cee8acabf0801049f8c7d2e882f0b"
+    },
+    {
+      "bytes": 1971,
+      "path": "evidence/ibcx-st-fee-66276760.json",
+      "sha256": "7fb17e16fde6b67f83640c92fd5e4aa196676876422f4d76ed9ebb7a43a6b5c6"
+    },
+    {
+      "bytes": 358,
+      "path": "evidence/stake-aggregates-66276760.json",
+      "sha256": "aaa3158ef91056803ed03012c44cabf905534cadc6c24f893f05e0e0057a3227"
+    },
+    {
+      "bytes": 813,
+      "path": "evidence/treasury-balances-66276760.json",
+      "sha256": "a85271a4ad03b0ce958cc72568caac7777c717519bbd1cf168bdcba74bd864d3"
+    },
+    {
+      "bytes": 3012,
+      "path": "SOURCE-PINS.md",
+      "sha256": "1ac39a27ff714643f9e3b3f571fc23c7d0d7ad746d16702a30fc3e338570ed45"
+    }
+  ],
+  "height": "66276760",
+  "schema": "ion-daodao-modernization-evidence-manifest/v1",
+  "source_note": "SOURCE-PINS.md"
+}

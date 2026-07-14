@@ -1,0 +1,11 @@
+{
+  "chain_id": "osmosis-1",
+  "height": "66276760",
+  "stake_contract": "osmo1yg8930mj8pk288lmkjex0qz85mj8wgtns5uzwyn2hs25pwdnw42sf745wc",
+  "active_backing_uion": "1671832757",
+  "total_power_shares": "1671832757",
+  "claim_count": 177,
+  "claims_uion": "173848282",
+  "bank_uion": "1845681039",
+  "reconciliation": "1671832757 + 173848282 = 1845681039"
+}

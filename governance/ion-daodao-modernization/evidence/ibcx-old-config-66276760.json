@@ -1,0 +1,12 @@
+{
+  "data": {
+    "gov": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+    "pending_gov": null,
+    "paused": {
+      "paused": false,
+      "expires_at": null
+    },
+    "index_denom": "factory/osmo1yhd9tzp09d833u7ray4pc6wwp72aewtt2xwakszn3lzlf2klnlwscjwhxt/uibcx",
+    "reserve_denom": "uosmo"
+  }
+}

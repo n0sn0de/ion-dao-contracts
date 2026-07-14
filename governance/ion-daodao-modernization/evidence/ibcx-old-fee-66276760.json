@@ -1,0 +1,62 @@
+{
+  "data": {
+    "collector": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+    "mint_fee": null,
+    "burn_fee": "0.0015",
+    "streaming_fee": {
+      "rate": "0.000000000173926",
+      "collected": [
+        {
+          "denom": "ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+          "amount": "3732"
+        },
+        {
+          "denom": "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2",
+          "amount": "1701"
+        },
+        {
+          "denom": "ibc/903A61A498756EA560B85A85132D3AEE21B5DEDD41213725D22ABF276EA6945E",
+          "amount": "885"
+        },
+        {
+          "denom": "ibc/6AE98883D4D5D5FF9E50D7130F1305DA2FFA0C652D1DD9C123657C6B4EB2DF8A",
+          "amount": "9618709321223645"
+        },
+        {
+          "denom": "uion",
+          "amount": "0"
+        },
+        {
+          "denom": "ibc/46B44899322F3CD854D2D46DEEF881958467CDD4B3B10086DA49296BBED94BED",
+          "amount": "8401"
+        },
+        {
+          "denom": "uosmo",
+          "amount": "22588"
+        },
+        {
+          "denom": "ibc/1DCC8A6CB5689018431323953344A9F6CC4D0BFB261E88C9F7777372C10CD076",
+          "amount": "5989"
+        },
+        {
+          "denom": "ibc/0954E1C28EB7AF5B72D24F3BC2B47BBB2FDF91BDDFD57B74B99E133AED40972A",
+          "amount": "5778"
+        },
+        {
+          "denom": "ibc/987C17B11ABC2B20019178ACE62929FE9840202CE79498E29FE8E5CB02B7C0A4",
+          "amount": "121149"
+        },
+        {
+          "denom": "ibc/A8CA5EE328FA10C9519DF6057DA1F69682D28F7D0F5CCC7ECB72E3DCA2D157A4",
+          "amount": "334"
+        },
+        {
+          "denom": "ibc/67795E528DF67C5606FC20F824EA39A6EF55BA133F4DC79C90A8C47A0901E17C",
+          "amount": "76987"
+        }
+      ],
+      "freeze": false,
+      "last_collected_at": 1784006602
+    }
+  }
+}

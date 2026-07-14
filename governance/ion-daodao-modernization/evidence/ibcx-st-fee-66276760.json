@@ -1,0 +1,62 @@
+{
+  "data": {
+    "collector": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+    "mint_fee": null,
+    "burn_fee": "0.0015",
+    "streaming_fee": {
+      "rate": "0.000000000173926",
+      "collected": [
+        {
+          "denom": "ibc/1480B8FD20AD5FCAE81EA87584D269547DD4D436843C1D20F15E00EB64743EF4",
+          "amount": "17502039"
+        },
+        {
+          "denom": "ibc/C140AFD542AE77BD7DCC83F13FDD8C5E5BB8C4929785E6EC2F4C636F98F17901",
+          "amount": "19332405"
+        },
+        {
+          "denom": "ibc/903A61A498756EA560B85A85132D3AEE21B5DEDD41213725D22ABF276EA6945E",
+          "amount": "12241728"
+        },
+        {
+          "denom": "ibc/C5579A9595790017C600DD726276D978B9BF314CF82406CE342720A9C7911A01",
+          "amount": "153232193553915755420"
+        },
+        {
+          "denom": "uion",
+          "amount": "8721"
+        },
+        {
+          "denom": "ibc/84502A75BCA4A5F68D464C00B3F610CE2585847D59B52E5FFB7C3C9D2DDCD3FE",
+          "amount": "126159221"
+        },
+        {
+          "denom": "ibc/D176154B0C63D1F9C6DCFB4F70349EBF2E2B5A87A05902F57A6AE92B863E9AEC",
+          "amount": "282235473"
+        },
+        {
+          "denom": "ibc/1DCC8A6CB5689018431323953344A9F6CC4D0BFB261E88C9F7777372C10CD076",
+          "amount": "77598846"
+        },
+        {
+          "denom": "ibc/0954E1C28EB7AF5B72D24F3BC2B47BBB2FDF91BDDFD57B74B99E133AED40972A",
+          "amount": "89703251"
+        },
+        {
+          "denom": "ibc/5DD1F95ED336014D00CE2520977EC71566D282F9749170ADC83A392E0EA7426A",
+          "amount": "955131078"
+        },
+        {
+          "denom": "ibc/A8CA5EE328FA10C9519DF6057DA1F69682D28F7D0F5CCC7ECB72E3DCA2D157A4",
+          "amount": "3846655"
+        },
+        {
+          "denom": "ibc/02F196DA6FD0917DD5FEA249EE61880F4D941EE9059E7964C5C9B50AF103800F",
+          "amount": "1049313142"
+        }
+      ],
+      "freeze": false,
+      "last_collected_at": 1784006602
+    }
+  }
+}

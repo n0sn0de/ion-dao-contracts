@@ -1,0 +1,15 @@
+{
+  "address": "osmo1xqw2sl9zk8a6pch0csaw78n4swg5ws8t62wc5qta4gnjxfqg6v2qcs243k",
+  "contract_info": {
+    "code_id": "49",
+    "creator": "osmo14n3a65fnqz9jve85l23al6m3pjugf0atvrfqh5",
+    "admin": "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm",
+    "label": "stIBCX Core <Product of ION DAO>",
+    "created": {
+      "block_height": "10007196",
+      "tx_index": "0"
+    },
+    "ibc_port_id": "",
+    "extension": null
+  }
+}
